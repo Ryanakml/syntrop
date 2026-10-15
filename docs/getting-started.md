@@ -35,7 +35,7 @@ Syntrop is distributed as a zero-dependency local engine.
 
 ```sh
 # 1. Clone the repository
-git clone https://github.com/Ryanakml/LifeOs.git syntrop
+git clone https://github.com/Ryanakml/syntrop.git
 cd syntrop
 
 # 2. Make the CLI executable

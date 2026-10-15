@@ -82,7 +82,7 @@ node -v   # Must be >= 24.15.0
 
 ### 2. Setup
 ```sh
-git clone https://github.com/Ryanakml/LifeOs.git syntrop
+git clone https://github.com/Ryanakml/syntrop.git
 cd syntrop
 chmod +x src/cli.ts
 npm link   # Exposes `syntrop` (and alias `syn`) globally
