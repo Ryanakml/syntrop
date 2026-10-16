@@ -1,10 +1,14 @@
 ---
 name: syntrop-reasoning
-description: Frame consequential Syntrop choices, compare options, and record defensible decisions when the user is deciding what to do.
+description: Compare consequential Syntrop choices, including implicit strategic decisions inside planning requests, and recommend a defensible direction before execution.
 ---
 
 # Reasoning
 
-Clarify the actual objective and what success would mean. Retrieve only relevant goals, projects, commitments, preferences, and evidence. For a complex choice, separate the subdecisions and use criteria appropriate to each; do not reuse a repository score to judge an issue or a schedule. Compare viable options, including postponement, against opportunity cost and reversibility. Challenge weak assumptions and update the comparison when new evidence changes it.
+Follow the [canonical routing contract](../../AGENTS.md). Clarify the outcome and success criteria; recover only relevant goals, commitments, preferences, decisions, and evidence. Separate independent subdecisions. If a material fact is missing, use research/reconnaissance before treating the direction as settled; acknowledge unavailable access.
 
-Give a concise recommendation with evidence, assumptions, and the main tradeoff. Once the user commits to a conclusion, record it with `syntrop decision add`; use a Markdown note for longer context. Do not invent certainty or convert an exploratory conversation into operational work.
+Compare viable options, including postponement, against opportunity cost, reversibility, constraints, and cost of error. Use criteria appropriate to each decision: repository suitability, issue feasibility, and available time are different questions. Challenge assumptions and reconcile contradictory evidence. Stop once a defensible immediate recommendation is possible.
+
+Recommend a practical direction with supporting facts, remaining assumptions, the main tradeoff, and what would change your mind. Separate your recommendation from a user-owned commitment. If the user has delegated a reversible routine choice, use judgment without repetitive confirmation; do not infer consent to consequential commitments from an exploratory discussion.
+
+Acceptance of a recommendation, permission to record it, and permission to execute are distinct. Use `syntrop decision add --title TEXT --rationale TEXT` only when recording is authorized; link the project/source where relevant. Validate and read back. Keep longer supporting context in private Markdown. Feed an accepted, sufficiently grounded direction to planning without inventing agreement or filling the task list with unresolved choices.

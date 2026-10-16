@@ -1,0 +1,70 @@
++zsh:1> cat <fixture>/request.md
+# Evaluation context
+Read <repo>/AGENTS.md and only relevant skills. This is a synthetic isolated evaluation; never access ~/.syntrop or real personal data.
+Evaluation clock: 2026-10-16T12:00:00+07:00, timezone Asia/Jakarta. Treat relative dates against this supplied clock.
+Use this workspace explicitly on every CLI call: <fixture>/private
+CLI: node <repo>/src/cli.ts --workspace <fixture>/private --json ...
+Fixture manifest: <fixture>/fixture.json
+Relevant stored profile: <fixture>/private/knowledge/profile.md
+Artifacts live under <fixture>/artifacts. All candidate repositories are synthetic local snapshots, never real URLs.
+
+# User request
+Portfolio gue kayaknya butuh diperbaiki. Bikin rencana supaya lebih menarik buat recruiter.
++zsh:1> cat <fixture>/private/knowledge/profile.md
+# Synthetic evaluation profile
+Observed: 2026-10-16. All data here is fictional.
+Goal: fullstack engineering employment within three months.
+Skills: TypeScript, React, Node; little Rust or Python experience.
+Contribution history: one documentation PR drafted, never submitted; no accepted code PRs.
+Capacity: five focused hours next week after client work. Saturday morning only 09:00–11:00 is available, but already committed to the meeting. Energy: strongest early afternoon.
+No primary OSS repository has been selected. Career visibility matters more than launching a company this quarter. SaaS would need user validation and has no existing customers.
+Neovim configuration: see artifacts/nvim/init.lua. Candidate ecosystems: see artifacts/repos/.
+Portfolio: unavailable; no local copy or reachable URL is supplied.
++zsh:1> rg --files <fixture>/artifacts
+<fixture>/artifacts/nvim/init.lua
+<fixture>/artifacts/repos/Cedar/issues.md
+<fixture>/artifacts/repos/Cedar/CONTRIBUTING.md
+<fixture>/artifacts/repos/Cedar/README.md
+<fixture>/artifacts/repos/Quartz/issues.md
+<fixture>/artifacts/repos/Quartz/CONTRIBUTING.md
+<fixture>/artifacts/repos/Quartz/README.md
+<fixture>/artifacts/repos/Harbor/issues.md
+<fixture>/artifacts/repos/Harbor/CONTRIBUTING.md
+<fixture>/artifacts/repos/Harbor/README.md
++zsh:1> entity=goal
++zsh:1> node src/cli.ts --workspace <fixture>/private --json goal list
+[{"id":"goal_563b9556-40c2-4cf4-b860-71f9f9ad83ca","title":"Synthetic: fullstack engineering role within three months","status":"active","created_at":"2026-10-16T09:46:40.720Z","updated_at":"2026-10-16T09:46:40.720Z","version":1}]
++zsh:1> entity=project
++zsh:1> node src/cli.ts --workspace <fixture>/private --json project list
+[{"id":"prj_3b1ac73e-8cce-4357-96c0-784e9e04d35b","goal_id":"goal_563b9556-40c2-4cf4-b860-71f9f9ad83ca","title":"Synthetic existing portfolio work","description":"","status":"active","created_at":"2026-10-16T09:46:40.819Z","updated_at":"2026-10-16T09:46:40.819Z","version":1,"completion_override_reason":null}]
++zsh:1> entity=task
++zsh:1> node src/cli.ts --workspace <fixture>/private --json task list
+[{"id":"tsk_8337e3f6-5ec6-4375-8195-b15d43074be1","project_id":"prj_3b1ac73e-8cce-4357-96c0-784e9e04d35b","title":"Confirm API behavior in local reproduction","description":"","status":"todo","priority":3,"due_at":null,"estimate_minutes":45,"created_at":"2026-10-16T09:46:40.927Z","updated_at":"2026-10-16T09:46:40.927Z","completed_at":null,"version":1,"completion_override_reason":null,"blocked_by":[],"ready":true},{"id":"tsk_54ec5422-83ea-4392-b011-12e1034e6883","project_id":"prj_3b1ac73e-8cce-4357-96c0-784e9e04d35b","title":"Implement verified API fix","description":"","status":"todo","priority":3,"due_at":null,"estimate_minutes":90,"created_at":"2026-10-16T09:46:41.040Z","updated_at":"2026-10-16T09:46:41.040Z","completed_at":null,"version":1,"completion_override_reason":null,"blocked_by":["tsk_8337e3f6-5ec6-4375-8195-b15d43074be1"],"ready":false}]
++zsh:1> entity=decision
++zsh:1> node src/cli.ts --workspace <fixture>/private --json decision list
+[]
++zsh:1> entity=calendar
++zsh:1> node src/cli.ts --workspace <fixture>/private --json calendar list
+[{"id":"evt_334082d8-4f49-48d1-aa64-0aa6f51118a4","title":"Synthetic existing meeting","start_at":"2026-10-17T02:00:00.000Z","end_at":"2026-10-17T04:00:00.000Z","note":"","created_at":"2026-10-16T09:46:41.135Z","updated_at":"2026-10-16T09:46:41.135Z","version":1,"status":"scheduled"},{"id":"evt_1d3f01f3-9354-4928-9a19-79ffffc1da6d","title":"Synthetic client commitment","start_at":"2026-10-19T02:00:00.000Z","end_at":"2026-10-19T05:00:00.000Z","note":"","created_at":"2026-10-16T09:46:41.224Z","updated_at":"2026-10-16T09:46:41.224Z","version":1,"status":"scheduled"}]
++zsh:1> entity=schedule
++zsh:1> node src/cli.ts --workspace <fixture>/private --json schedule list
+[]
+
+
+ACTUAL FINAL RESPONSE
+Bisa, tapi gue belum bisa bilang bagian portfolio mana yang lemah: file lokal maupun URL-nya belum tersedia. Jadi ini draft sementara untuk target fullstack React/Node lo, bukan hasil audit.
+
+Gue pilih perbaikan bukti kerja dulu ketimbang langsung redesign. Asumsinya layout sekarang masih bisa dipakai; kalau nanti ternyata mobile-nya rusak atau demo gak jalan, itu naik jadi prioritas pertama.
+
+Draft minggu 19–25 Oktober dari kapasitas 5 jam:
+
+- Setelah link/file tersedia: cek halaman utama, mobile, akses demo/repo, dan apakah kontribusi pribadi lo bisa dipahami — 30 menit. Hasilnya daftar maksimal tiga penghambat, supaya scope gak melebar.
+- Pilih satu proyek paling relevan yang benar-benar bisa diverifikasi, lalu tulis masalah → peran lo → alur frontend/API/data → keputusan teknis → bukti hasil — 60 menit. Jangan bikin angka impact yang belum ada.
+- Setelah audit, tampilkan case study itu dan perjelas posisi fullstack serta akses kontak — 45 menit, dengan asumsi cukup edit konten.
+- Cek ulang mobile, link, dan demo — 30 menit. Selesai kalau bukti kerja mudah ditemukan dan jalur kontak berfungsi.
+
+Task portfolio yang sudah tercatat makan 2 jam 15 menit: reproduksi API 45 menit → baru fix 90 menit kalau bug terbukti. Dengan draft konten di atas totalnya 5 jam, tanpa buffer; jadi pilih hanya 90 menit audit + case study minggu depan, sisakan 75 menit buffer, lalu layout/polish minggu berikutnya. Kalau proyek case study memakai API itu, klaim hasil fix harus menunggu verifikasi dan perbaikannya selesai.
+
+Sabtu 17 Oktober 09–11 sudah meeting; Senin 19 Oktober 09–12 ada client. Jam kerja spesifik belum gue alokasikan. Belum ada task atau sesi baru yang disimpan.
+
+Kirim link portfolio atau folder/file-nya supaya gue bisa ganti draft ini dengan prioritas berdasarkan halaman yang nyata.

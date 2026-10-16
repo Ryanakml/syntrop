@@ -1,0 +1,77 @@
++zsh:1> cat <fixture>/request.md
+# Evaluation context
+Read <repo>/AGENTS.md and only relevant skills. This is a synthetic isolated evaluation; never access ~/.syntrop or real personal data.
+Evaluation clock: 2026-10-16T12:00:00+07:00, timezone Asia/Jakarta. Treat relative dates against this supplied clock.
+Use this workspace explicitly on every CLI call: <fixture>/private
+CLI: node <repo>/src/cli.ts --workspace <fixture>/private --json ...
+Fixture manifest: <fixture>/fixture.json
+Relevant stored profile: <fixture>/private/knowledge/profile.md
+Artifacts live under <fixture>/artifacts. All candidate repositories are synthetic local snapshots, never real URLs.
+Prior established conversation: <fixture>/prior-conversation.md
+
+# User request
+Oke, gue setuju dengan pilihan tadi. Sekarang simpan keputusan itu dan buat rencana eksekusi minggu depan.
++zsh:1> cat <fixture>/prior-conversation.md
+# Prior established decision (synthetic conversation context)
+Agent: Cedar fits the fullstack goal and existing TypeScript skills. Start with reproducing the empty-filter issue, write a failing test, fix it, and run contributor checks before proposing a PR. Limit next week to five hours, honoring the Monday client commitment.
+User: Oke, gue setuju dengan pilihan tadi.
+This is established conversation context for scenario F; it does not authorize scheduling sessions or publishing an upstream PR.
++zsh:1> cat <fixture>/private/knowledge/profile.md
+# Synthetic evaluation profile
+Observed: 2026-10-16. All data here is fictional.
+Goal: fullstack engineering employment within three months.
+Skills: TypeScript, React, Node; little Rust or Python experience.
+Contribution history: one documentation PR drafted, never submitted; no accepted code PRs.
+Capacity: five focused hours next week after client work. Saturday morning only 09:00–11:00 is available, but already committed to the meeting. Energy: strongest early afternoon.
+No primary OSS repository has been selected. Career visibility matters more than launching a company this quarter. SaaS would need user validation and has no existing customers.
+Neovim configuration: see artifacts/nvim/init.lua. Candidate ecosystems: see artifacts/repos/.
+Portfolio: see artifacts/portfolio/index.html.
++zsh:1> entity=decision
++zsh:1> node src/cli.ts --workspace <fixture>/private --json decision list
+[]
++zsh:1> entity=project
++zsh:1> node src/cli.ts --workspace <fixture>/private --json project list
+[{"id":"prj_ee817025-7d17-4508-bfc0-42d0f234d21d","goal_id":"goal_8d4550eb-adc9-4671-b088-1aec9830293f","title":"Synthetic existing portfolio work","description":"","status":"active","created_at":"2026-10-16T09:47:06.699Z","updated_at":"2026-10-16T09:47:06.699Z","version":1,"completion_override_reason":null}]
++zsh:1> entity=task
++zsh:1> node src/cli.ts --workspace <fixture>/private --json task list
+[{"id":"tsk_28df7cd0-d97f-4829-ad9f-35b940f41761","project_id":"prj_ee817025-7d17-4508-bfc0-42d0f234d21d","title":"Confirm API behavior in local reproduction","description":"","status":"todo","priority":3,"due_at":null,"estimate_minutes":45,"created_at":"2026-10-16T09:47:06.780Z","updated_at":"2026-10-16T09:47:06.780Z","completed_at":null,"version":1,"completion_override_reason":null,"blocked_by":[],"ready":true},{"id":"tsk_a4a03e81-93f1-415f-9ef5-d532b4d8fef7","project_id":"prj_ee817025-7d17-4508-bfc0-42d0f234d21d","title":"Implement verified API fix","description":"","status":"todo","priority":3,"due_at":null,"estimate_minutes":90,"created_at":"2026-10-16T09:47:06.860Z","updated_at":"2026-10-16T09:47:06.860Z","completed_at":null,"version":1,"completion_override_reason":null,"blocked_by":["tsk_28df7cd0-d97f-4829-ad9f-35b940f41761"],"ready":false}]
++zsh:1> cat <fixture>/artifacts/repos/Cedar/CONTRIBUTING.md
+# Synthetic contribution guidance
+TypeScript fullstack dashboard. Matching React/Node skills. CONTRIBUTING requires a reproducible failing test and npm test. Starter issue: empty filter returns a stale result; reproduction steps supplied. Snapshot has recent maintainer replies, but those are dated evidence only.
+Do not infer current remote status from this offline file.
++zsh:1> cat <fixture>/artifacts/repos/Cedar/issues.md
+# Synthetic issue evidence
+TypeScript fullstack dashboard. Matching React/Node skills. CONTRIBUTING requires a reproducible failing test and npm test. Starter issue: empty filter returns a stale result; reproduction steps supplied. Snapshot has recent maintainer replies, but those are dated evidence only.
+No issue assignment or upstream agreement is implied.
++zsh:1> entity=goal
++zsh:1> node src/cli.ts --workspace <fixture>/private --json goal list
+[{"id":"goal_8d4550eb-adc9-4671-b088-1aec9830293f","title":"Synthetic: fullstack engineering role within three months","status":"active","created_at":"2026-10-16T09:47:06.618Z","updated_at":"2026-10-16T09:47:06.618Z","version":1}]
++zsh:1> entity=calendar
++zsh:1> node src/cli.ts --workspace <fixture>/private --json calendar list
+[{"id":"evt_2da196e2-eba3-4ab7-afdb-d8971fafb25d","title":"Synthetic existing meeting","start_at":"2026-10-17T02:00:00.000Z","end_at":"2026-10-17T04:00:00.000Z","note":"","created_at":"2026-10-16T09:47:06.943Z","updated_at":"2026-10-16T09:47:06.943Z","version":1,"status":"scheduled"},{"id":"evt_02ddb21f-1d37-481c-a964-6006323f6db9","title":"Synthetic client commitment","start_at":"2026-10-19T02:00:00.000Z","end_at":"2026-10-19T05:00:00.000Z","note":"","created_at":"2026-10-16T09:47:07.024Z","updated_at":"2026-10-16T09:47:07.024Z","version":1,"status":"scheduled"}]
++zsh:1> entity=schedule
++zsh:1> node src/cli.ts --workspace <fixture>/private --json schedule list
+[]
++zsh:1> node src/cli.ts --workspace <fixture>/private --json decision add --title 'Fokus kontribusi OSS Cedar untuk bukti fullstack' --rationale 'Pilihan disetujui pengguna: stack TypeScript/React/Node cocok dengan skill dan target kerja. Mulai dari reproduksi empty-filter, failing test, fix minimum, contributor checks sebelum draft PR. Batasi minggu 19–25 Oktober 2026 maksimal lima jam, hormati komitmen client Senin. Status issue dan aktivitas upstream belum diverifikasi live; bukti lokal adalah snapshot sintetis. Keputusan ini tidak menjadwalkan sesi atau mengizinkan publikasi PR.' --source-url https://cedar.example.invalid/fixture --idempotency-key F-cedar-decision
+{"id":"dec_16f9650d-ed3a-402f-bd10-24827ef65cae","project_id":null,"title":"Fokus kontribusi OSS Cedar untuk bukti fullstack","rationale":"Pilihan disetujui pengguna: stack TypeScript/React/Node cocok dengan skill dan target kerja. Mulai dari reproduksi empty-filter, failing test, fix minimum, contributor checks sebelum draft PR. Batasi minggu 19–25 Oktober 2026 maksimal lima jam, hormati komitmen client Senin. Status issue dan aktivitas upstream belum diverifikasi live; bukti lokal adalah snapshot sintetis. Keputusan ini tidak menjadwalkan sesi atau mengizinkan publikasi PR.","source_url":"https://cedar.example.invalid/fixture","decided_at":"2026-10-16T09:47:24.297Z"}
++zsh:1> node src/cli.ts --workspace <fixture>/private --json validate
+{"ok":true,"issues":[],"counts":{"goals":1,"projects":1,"tasks":2,"work_sessions":0,"session_outcomes":0,"calendar_events":2,"habits":0,"habit_occurrences":0,"decisions":1}}
++zsh:1> node src/cli.ts --workspace <fixture>/private --json decision list
+[{"id":"dec_16f9650d-ed3a-402f-bd10-24827ef65cae","project_id":null,"title":"Fokus kontribusi OSS Cedar untuk bukti fullstack","rationale":"Pilihan disetujui pengguna: stack TypeScript/React/Node cocok dengan skill dan target kerja. Mulai dari reproduksi empty-filter, failing test, fix minimum, contributor checks sebelum draft PR. Batasi minggu 19–25 Oktober 2026 maksimal lima jam, hormati komitmen client Senin. Status issue dan aktivitas upstream belum diverifikasi live; bukti lokal adalah snapshot sintetis. Keputusan ini tidak menjadwalkan sesi atau mengizinkan publikasi PR.","source_url":"https://cedar.example.invalid/fixture","decided_at":"2026-10-16T09:47:24.297Z"}]
+
+
+ACTUAL FINAL RESPONSE
+Keputusan fokus Cedar sudah gue simpan sebagai dec_16f9650d-ed3a-402f-bd10-24827ef65cae, termasuk alasan, batas lima jam, dan sumber snapshot. Sudah dibaca balik; validate lolos.
+
+Rencana eksekusi 19–25 Oktober:
+
+1. Status issue + setup + baseline test — 45 menit. Lanjut hanya kalau bug masih relevan dan environment jalan. Status upstream sekarang belum terverifikasi; snapshot lokal bukan bukti assignment.
+2. Reproduksi empty-filter + failing regression test — 60 menit setelah langkah 1. Output: test gagal karena stale result, bukan setup.
+3. Fix minimum + npm test sesuai CONTRIBUTING — 90 menit setelah reproduksi terbukti. Output: regression test lulus dan contributor checks tercatat.
+4. Draft PR berisi masalah, penyebab, perubahan, dan bukti test — 45 menit setelah semua checks lolos. Publikasi PR tetap langkah terpisah.
+
+Total 4 jam + 1 jam buffer. Kalau setup/reproduksi mentok atau scope melebar, stop di checkpoint itu dan geser sisa target ke minggu berikutnya.
+
+Ada pekerjaan portfolio lama 45 + 90 menit dengan dependency reproduksi → fix. Kalau itu juga dikerjakan minggu depan, ambil dari budget yang sama: cukup targetkan setup dan reproduksi Cedar dulu, jangan menumpuk dua rencana lima jam. Komitmen client Senin 19 Oktober 09–12 tetap dihormati; pilih slot awal siang yang memang tersedia.
+
+Yang tersimpan baru keputusan. Rencana di atas masih proposal; belum dibuat task baru atau dijadwalkan sesi.

@@ -1,6 +1,6 @@
 {
   "name": "syntrop",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Deterministic, local-first operational memory engine for AI coding agents. SQLite + DAGs + conflict-checked schedule.",
   "private": true,
   "license": "MIT",
@@ -27,7 +27,14 @@
     "assets",
     "AGENTS.md",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "GEMINI.md",
+    "CLAUDE.md",
+    "docs",
+    "evals",
+    "CHANGELOG.md",
+    ".cursor/rules/syntrop.mdc",
+    ".github/copilot-instructions.md"
   ],
   "bin": {
     "syntrop": "./src/cli.ts",
@@ -43,8 +50,9 @@
     "life": "node src/cli.ts",
     "test": "node --test tests/*.test.mjs",
     "typecheck": "tsc --noEmit",
-    "format": "prettier --write src tests examples",
-    "format:check": "prettier --check src tests examples"
+    "format": "prettier --write src tests examples evals",
+    "format:check": "prettier --check src tests examples evals",
+    "eval:list": "node evals/run.mjs list"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",

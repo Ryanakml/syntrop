@@ -79,5 +79,5 @@ echo -e "✓ Decision recorded atomically.\n"
 echo -e "${GREEN}[Step 8] Running workspace doctor:${NC}"
 node "$CLI" --workspace "$WS_DIR" doctor
 echo -e "\n${BLUE}======================================================${NC}"
-echo -e "${BLUE}  Tour complete. All invariants proven in isolation.  ${NC}"
+echo -e "${BLUE}  Tour complete. Demonstrated checks passed in isolation.  ${NC}"
 echo -e "${BLUE}======================================================${NC}"

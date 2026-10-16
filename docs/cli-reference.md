@@ -103,7 +103,7 @@ Creates a new task.
 Lists tasks, optionally filtered by project.
 
 ### `syntrop task next`
-Returns only **actionable, ready tasks**:
+Returns the next **actionable, ready task**, or null if none qualifies:
 - Task status is `inbox`, `todo`, or `in_progress`.
 - Linked project (if any) is active.
 - **All prerequisite tasks are completed (`done`)**.
@@ -131,6 +131,8 @@ Removes a dependency edge.
 ## 5. Work Sessions & Calendar
 
 ### `syntrop schedule add --task ID --start ISO_OFFSET --end ISO_OFFSET`
+
+The engine checks task existence, project lifecycle, and interval conflicts. It permits blocked future work; the calling agent must inspect prerequisites, authorization, estimates, and human capacity before scheduling. Cognitive readiness labels in `AGENTS.md` are not CLI statuses.
 Schedules a planned work session for a task.
 - Timestamps require explicit ISO 8601 offsets (e.g. `2026-10-15T09:00+07:00`).
 - Rejects temporal overlaps `[start, end)` against existing sessions and calendar events.

@@ -1,0 +1,91 @@
++zsh:1> cat <fixture>/request.md
+# Evaluation context
+Read <repo>/AGENTS.md and only relevant skills. This is a synthetic isolated evaluation; never access ~/.syntrop or real personal data.
+Evaluation clock: 2026-10-16T12:00:00+07:00, timezone Asia/Jakarta. Treat relative dates against this supplied clock.
+Use this workspace explicitly on every CLI call: <fixture>/private
+CLI: node <repo>/src/cli.ts --workspace <fixture>/private --json ...
+Fixture manifest: <fixture>/fixture.json
+Relevant stored profile: <fixture>/private/knowledge/profile.md
+Artifacts live under <fixture>/artifacts. All candidate repositories are synthetic local snapshots, never real URLs.
+
+# User request
+Jadwalkan implementasi ini besok pagi. Implementasi yang gue maksud adalah task implementImplementation di fixture manifest.
++zsh:1> cat skills/syntrop-scheduling/SKILL.md
+---
+name: syntrop-scheduling
+description: Allocate authorized Syntrop work sessions around prerequisites, deadlines, real commitments, and sustainable capacity; replan only within granted scope.
+---
+
+# Scheduling
+
+Follow the [canonical routing contract](../../AGENTS.md). A plan is not automatically authorized or executable. Inspect `syntrop week --json`, relevant task/project state, prerequisites, estimates, deadlines, and calendar events for the requested period. Read current versions before changing records. Separate task deadlines from work sessions.
+
+Estimate a realistic budget after fixed commitments, energy, buffers, and competing priorities; free time is only an upper bound. Prefer ready tasks now. Do not schedule blocked work as ready merely because the time is free. Future blocked work requires a credible prerequisite completion checkpoint and an explicit contingency; the CLI permits this but does not prove readiness. There is no tentative-session state: keep tentative suggestions in the proposal until authorized.
+
+If a direction still needs evidence or a user-owned decision, route upstream rather than allocating speculative execution. Propose a small near-term schedule, not a detailed calendar for distant uncertainties. An explicit deadline request alone does not authorize reserving time.
+
+Use `syntrop schedule add` or `syntrop schedule move` only for authorized changes, with explicit timestamp offsets. Resolve `SCHEDULE_CONFLICT` by reporting the conflict and choosing a permitted alternative or proposing one; never silently move existing commitments. Use `calendar cancel` for cancelled events. Respect recorded session history.
+
+Use idempotency on retries and expected versions on supported updates. Run `syntrop validate`, read back the schedule and task due dates, and report what changed versus what remains proposed. A successful overlap check does not establish human capacity or strategic suitability.
++zsh:1> cat <fixture>/fixture.json
+{
+  "schemaVersion": 1,
+  "root": "<fixture>",
+  "workspace": "<fixture>/private",
+  "scenario": "I",
+  "clock": "2026-10-16T12:00:00+07:00",
+  "timezone": "Asia/Jakarta",
+  "ids": {
+    "goal": "goal_981a6a15-b2f6-4ffd-9d02-24da6c9d494d",
+    "project": "prj_9fc8520d-c850-4fb3-aa41-2fa50cd5b156",
+    "prerequisite": "tsk_0662a240-573d-4d3c-99bd-652e9d73d918",
+    "implementImplementation": "tsk_6972a1e6-b335-4289-8ffb-fbb759b52dad",
+    "calendar": "evt_b0e2df82-eade-4c40-8f99-6d8a343471a2",
+    "nextWeek": "evt_d69029eb-37be-414c-a1d7-5581cc77eb38"
+  },
+  "artifactHashes": {
+    "<fixture>/private/knowledge/profile.md": "74795e5876f9f9b34a7ab5869163762f472f04c86ec59e0af7b55a6ddf82c904",
+    "<fixture>/artifacts/nvim/init.lua": "188b54b3b5f444cd953a9964e44caf861533b6e1e3e1dd600bbc7eaf5f5fd764",
+    "<fixture>/artifacts/repos/Cedar/README.md": "22e87893e443e8aaf772550fd0cbb714226346ff3e4e8dfa22cb1c49c21bcec8",
+    "<fixture>/artifacts/repos/Cedar/CONTRIBUTING.md": "5c03292e866c062c5347a8414c03e0b3cb60fcab893a503782eff05d7ea2e85c",
+    "<fixture>/artifacts/repos/Cedar/issues.md": "079be989247f6f148e85805cb28d1beb3cb89dc8d19b47863cf49c6b8d14e98e",
+    "<fixture>/artifacts/repos/Quartz/README.md": "2cb2cf2f0653eea7a70dda5b94c4f987d829e4da1261ef1acf2718cd0dcc482b",
+    "<fixture>/artifacts/repos/Quartz/CONTRIBUTING.md": "800a0b197b5dc4cd9ea3cd2276fc423ec6a915d2ba9f79161134cbad86287fc1",
+    "<fixture>/artifacts/repos/Quartz/issues.md": "19cc3328cce1731db5cbcfe889ab3f5a14711e61d2ba3c843801980a9690fb11",
+    "<fixture>/artifacts/repos/Harbor/README.md": "fda7ab3161fb2d48c7828115389386427b0facdc1148e9c40fae495b11d9d468",
+    "<fixture>/artifacts/repos/Harbor/CONTRIBUTING.md": "442ecd36018a31b2a740cac1152fbb8921a857e4b23a2b7c8708b5d539971546",
+    "<fixture>/artifacts/repos/Harbor/issues.md": "b1f4ed1f445260869bf923d72ec05f99c82ec4a51d68f4f429545d9ce1758287",
+    "<fixture>/artifacts/portfolio/index.html": "7ca4be0ada2408de6efce0d313a0f74b7a35829f1a0f7f675e1b07022b5e7d10"
+  }
+}
++zsh:1> cat <fixture>/private/knowledge/profile.md
+# Synthetic evaluation profile
+Observed: 2026-10-16. All data here is fictional.
+Goal: fullstack engineering employment within three months.
+Skills: TypeScript, React, Node; little Rust or Python experience.
+Contribution history: one documentation PR drafted, never submitted; no accepted code PRs.
+Capacity: five focused hours next week after client work. Saturday morning only 09:00–11:00 is available, but already committed to the meeting. Energy: strongest early afternoon.
+No primary OSS repository has been selected. Career visibility matters more than launching a company this quarter. SaaS would need user validation and has no existing customers.
+Neovim configuration: see artifacts/nvim/init.lua. Candidate ecosystems: see artifacts/repos/.
+Portfolio: see artifacts/portfolio/index.html.
++zsh:1> entity=task
++zsh:1> node src/cli.ts --workspace <fixture>/private --json task list
+[{"id":"tsk_0662a240-573d-4d3c-99bd-652e9d73d918","project_id":"prj_9fc8520d-c850-4fb3-aa41-2fa50cd5b156","title":"Confirm API behavior in local reproduction","description":"","status":"todo","priority":3,"due_at":null,"estimate_minutes":45,"created_at":"2026-10-16T09:47:35.412Z","updated_at":"2026-10-16T09:47:35.412Z","completed_at":null,"version":1,"completion_override_reason":null,"blocked_by":[],"ready":true},{"id":"tsk_6972a1e6-b335-4289-8ffb-fbb759b52dad","project_id":"prj_9fc8520d-c850-4fb3-aa41-2fa50cd5b156","title":"Implement verified API fix","description":"","status":"todo","priority":3,"due_at":null,"estimate_minutes":90,"created_at":"2026-10-16T09:47:35.493Z","updated_at":"2026-10-16T09:47:35.493Z","completed_at":null,"version":1,"completion_override_reason":null,"blocked_by":["tsk_0662a240-573d-4d3c-99bd-652e9d73d918"],"ready":false}]
++zsh:1> entity=calendar
++zsh:1> node src/cli.ts --workspace <fixture>/private --json calendar list
+[{"id":"evt_b0e2df82-eade-4c40-8f99-6d8a343471a2","title":"Synthetic existing meeting","start_at":"2026-10-17T02:00:00.000Z","end_at":"2026-10-17T04:00:00.000Z","note":"","created_at":"2026-10-16T09:47:35.577Z","updated_at":"2026-10-16T09:47:35.577Z","version":1,"status":"scheduled"},{"id":"evt_d69029eb-37be-414c-a1d7-5581cc77eb38","title":"Synthetic client commitment","start_at":"2026-10-19T02:00:00.000Z","end_at":"2026-10-19T05:00:00.000Z","note":"","created_at":"2026-10-16T09:47:35.657Z","updated_at":"2026-10-16T09:47:35.657Z","version":1,"status":"scheduled"}]
++zsh:1> entity=schedule
++zsh:1> node src/cli.ts --workspace <fixture>/private --json schedule list
+[]
++zsh:1> node src/cli.ts --workspace <fixture>/private --json week --date 2026-10-17
+{"from":"2026-10-12","through":"2026-10-18","timezone":"Asia/Jakarta","tasks":[],"sessions":[],"events":[{"id":"evt_b0e2df82-eade-4c40-8f99-6d8a343471a2","title":"Synthetic existing meeting","start_at":"2026-10-17T02:00:00.000Z","end_at":"2026-10-17T04:00:00.000Z","note":"","created_at":"2026-10-16T09:47:35.577Z","updated_at":"2026-10-16T09:47:35.577Z","version":1,"status":"scheduled"}],"habits":[]}
++zsh:1> node src/cli.ts --workspace <fixture>/private --json project show prj_9fc8520d-c850-4fb3-aa41-2fa50cd5b156
+{"id":"prj_9fc8520d-c850-4fb3-aa41-2fa50cd5b156","goal_id":"goal_981a6a15-b2f6-4ffd-9d02-24da6c9d494d","title":"Synthetic existing portfolio work","description":"","status":"active","created_at":"2026-10-16T09:47:35.330Z","updated_at":"2026-10-16T09:47:35.330Z","version":1,"completion_override_reason":null,"tasks":[{"id":"tsk_0662a240-573d-4d3c-99bd-652e9d73d918","project_id":"prj_9fc8520d-c850-4fb3-aa41-2fa50cd5b156","title":"Confirm API behavior in local reproduction","description":"","status":"todo","priority":3,"due_at":null,"estimate_minutes":45,"created_at":"2026-10-16T09:47:35.412Z","updated_at":"2026-10-16T09:47:35.412Z","completed_at":null,"version":1,"completion_override_reason":null,"blocked_by":[],"ready":true},{"id":"tsk_6972a1e6-b335-4289-8ffb-fbb759b52dad","project_id":"prj_9fc8520d-c850-4fb3-aa41-2fa50cd5b156","title":"Implement verified API fix","description":"","status":"todo","priority":3,"due_at":null,"estimate_minutes":90,"created_at":"2026-10-16T09:47:35.493Z","updated_at":"2026-10-16T09:47:35.493Z","completed_at":null,"version":1,"completion_override_reason":null,"blocked_by":["tsk_0662a240-573d-4d3c-99bd-652e9d73d918"],"ready":false}]}
+
+
+ACTUAL FINAL RESPONSE
+Belum bisa gue jadwalkan besok pagi, Sabtu 17 Oktober. Slot tersedia lo cuma 09–11 WIB, dan seluruhnya sudah terisi meeting.
+
+Task “Implement verified API fix” juga masih blocked: reproduksi API 45 menit belum selesai; implementasinya sendiri estimasi 90 menit. Belum ada checkpoint penyelesaian prasyarat yang bisa gue jadikan dasar menjadwalkannya.
+
+Gue belum mengubah jadwal atau mindahin meeting. Opsi paling masuk akal: selesaikan reproduksi dulu, lalu pilih slot 90 menit setelah hasilnya terverifikasi. Ada slot lain yang memang lo sediakan untuk itu?

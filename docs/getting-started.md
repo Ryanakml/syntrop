@@ -68,9 +68,9 @@ syntrop init
 
 Verify workspace health with `syntrop doctor`:
 ```sh
-syntrop doctor
+syntrop doctor --json
 ```
-Expected output:
+Example output (paths, Node version, timezone, and counts vary):
 ```json
 {
   "node": "v24.21.0",
@@ -109,15 +109,19 @@ syntrop task add --title "Review AGENTS.md and skills" --status todo
 # Output prints Task 1 ID. Use it as prerequisite:
 syntrop task add --title "Connect AI coding agent" --status todo --depends-on <TASK_1_ID>
 
-# 3. Query next unblocked actions (Task 2 is blocked, so only Task 1 appears!)
+# 3. Query the next ready action (Task 2 is blocked, so Task 1 appears!)
 syntrop task next
 
-# 4. Schedule a focused work session
-syntrop schedule add --task <TASK_1_ID> --start 2026-10-15T09:00+07:00 --end 2026-10-15T10:00+07:00
+# 4. After checking prerequisites and existing commitments, reserve a future work session
+syntrop schedule add --task <TASK_1_ID> --start <START_ISO_WITH_OFFSET> --end <END_ISO_WITH_OFFSET>
 
 # 5. Inspect today's operational agenda
 syntrop today
 ```
+
+Replace angle-bracket placeholders before running the commands. For example, use an available future interval such as `2026-10-19T09:00+07:00` to `2026-10-19T10:00+07:00`. Inspect `syntrop calendar list --json` and `syntrop schedule list --json` first. The CLI permits sessions for dependency-blocked future tasks, so readiness and prerequisite timing require your or your agent's judgment.
+
+After changes, run `syntrop validate --json` and read back the affected records, for example `syntrop task show <TASK_1_ID> --json` and `syntrop schedule list --json`.
 
 ---
 
@@ -125,11 +129,16 @@ syntrop today
 
 Syntrop is designed to give AI coding agents persistent, verifiable operational memory.
 
-### Supported Agent Runtimes
-- **Google Antigravity / Gemini CLI**: Natively reads `AGENTS.md`.
-- **Claude Code**: Uses `CLAUDE.md` to discover instructions and skills.
-- **Cursor**: Uses `.cursor/rules/syntrop.mdc`.
-- **OpenAI Codex**: Uses `AGENTS.md` and `skills/`.
+### Agent entry points
+
+- **Claude Code**: `CLAUDE.md` points to the canonical protocol.
+- **Cursor**: `.cursor/rules/syntrop.mdc` supplies the project rule.
+- **GitHub Copilot**: `.github/copilot-instructions.md` supplies repository instructions on supported surfaces.
+- **Gemini CLI**: `GEMINI.md` is its default context entry point.
+- **Codex**: `AGENTS.md` supplies repository instructions.
+- **Antigravity / other runtimes**: manually ask the agent to read `AGENTS.md`; automatic discovery is unverified.
+
+Confirm your runtime actually read `AGENTS.md`. The six `skills/` files are read on demand through that protocol; they are not universally installed or auto-discovered. See [Agent Integration](agent-integration.md) for official discovery references and live-testing limits.
 
 ### The First Agent Prompt
 Open your preferred coding agent inside this repository and paste:
@@ -137,8 +146,12 @@ Open your preferred coding agent inside this repository and paste:
 > *"You are my executive operations partner using Syntrop.*  
 > *1. Read `AGENTS.md` to understand your operational rules, deterministic CLI commands, and safety boundaries.*  
 > *2. Run `syntrop doctor --json` to inspect our current workspace status.*  
-> *3. Help me plan my quarterly goals and outline our active projects.*  
+> *3. Inspect relevant goals, projects, tasks, and commitments; identify evidence or choices needed before proposing a quarterly plan.*<br>
 > *Constraint: Propose tasks for my review first. Do not commit state mutations to the database until I explicitly approve."*
+
+A clear authorized request can proceed directly. A consequential plan may first need inspection or a recommendation. These are agent workflow choices, not new database statuses. Asking for a proposal does not authorize saving tasks or sessions. For later authorized updates, the agent reads state, uses `--expected-version` for supported updates to seen records, applies changes, validates, and reads them back; retry writes use `--idempotency-key`.
+
+The CLI does not invoke AI or send network requests. Your agent runtime may use remote services; review its own privacy settings. Instruction files do not guarantee reasoning quality or autonomous continuity. [Behavior evaluations](../evals/README.md) describe what was and was not tested.
 
 ---
 

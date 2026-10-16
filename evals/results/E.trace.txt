@@ -1,0 +1,72 @@
+$ cat <fixture>/request.md
+# Evaluation context
+Read <repo>/AGENTS.md and only relevant skills. This is a synthetic isolated evaluation; never access ~/.syntrop or real personal data.
+Evaluation clock: 2026-10-16T12:00:00+07:00, timezone Asia/Jakarta. Treat relative dates against this supplied clock.
+Use this workspace explicitly on every CLI call: <fixture>/private
+CLI: node <repo>/src/cli.ts --workspace <fixture>/private --json ...
+Fixture manifest: <fixture>/fixture.json
+Relevant stored profile: <fixture>/private/knowledge/profile.md
+Artifacts live under <fixture>/artifacts. All candidate repositories are synthetic local snapshots, never real URLs.
+
+# User request
+Bro, menurut lo worth it nggak kalau gue pindah fokus dari OSS ke bikin SaaS?
+
+[exit 0]
+$ cat skills/syntrop-reasoning/SKILL.md <fixture>/private/knowledge/profile.md
+---
+name: syntrop-reasoning
+description: Compare consequential Syntrop choices, including implicit strategic decisions inside planning requests, and recommend a defensible direction before execution.
+---
+
+# Reasoning
+
+Follow the [canonical routing contract](../../AGENTS.md). Clarify the outcome and success criteria; recover only relevant goals, commitments, preferences, decisions, and evidence. Separate independent subdecisions. If a material fact is missing, use research/reconnaissance before treating the direction as settled; acknowledge unavailable access.
+
+Compare viable options, including postponement, against opportunity cost, reversibility, constraints, and cost of error. Use criteria appropriate to each decision: repository suitability, issue feasibility, and available time are different questions. Challenge assumptions and reconcile contradictory evidence. Stop once a defensible immediate recommendation is possible.
+
+Recommend a practical direction with supporting facts, remaining assumptions, the main tradeoff, and what would change your mind. Separate your recommendation from a user-owned commitment. If the user has delegated a reversible routine choice, use judgment without repetitive confirmation; do not infer consent to consequential commitments from an exploratory discussion.
+
+Acceptance of a recommendation, permission to record it, and permission to execute are distinct. Use `syntrop decision add --title TEXT --rationale TEXT` only when recording is authorized; link the project/source where relevant. Validate and read back. Keep longer supporting context in private Markdown. Feed an accepted, sufficiently grounded direction to planning without inventing agreement or filling the task list with unresolved choices.
+# Synthetic evaluation profile
+Observed: 2026-10-16. All data here is fictional.
+Goal: fullstack engineering employment within three months.
+Skills: TypeScript, React, Node; little Rust or Python experience.
+Contribution history: one documentation PR drafted, never submitted; no accepted code PRs.
+Capacity: five focused hours next week after client work. Saturday morning only 09:00–11:00 is available, but already committed to the meeting. Energy: strongest early afternoon.
+No primary OSS repository has been selected. Career visibility matters more than launching a company this quarter. SaaS would need user validation and has no existing customers.
+Neovim configuration: see artifacts/nvim/init.lua. Candidate ecosystems: see artifacts/repos/.
+Portfolio: see artifacts/portfolio/index.html.
+
+[exit 0]
+$ node '<repo>/src/cli.ts' --workspace <fixture>/private --json goal list
+[{"id":"goal_8f846b3f-980b-4218-9cab-f24d8e3ecf33","title":"Synthetic: fullstack engineering role within three months","status":"active","created_at":"2026-10-16T09:45:29.908Z","updated_at":"2026-10-16T09:45:29.908Z","version":1}]
+
+[exit 0]
+$ node '<repo>/src/cli.ts' --workspace <fixture>/private --json project list
+[{"id":"prj_13308687-729b-4461-9749-9628e7774540","goal_id":"goal_8f846b3f-980b-4218-9cab-f24d8e3ecf33","title":"Synthetic existing portfolio work","description":"","status":"active","created_at":"2026-10-16T09:45:29.990Z","updated_at":"2026-10-16T09:45:29.990Z","version":1,"completion_override_reason":null}]
+
+[exit 0]
+$ node '<repo>/src/cli.ts' --workspace <fixture>/private --json task list
+[{"id":"tsk_410240c0-a14c-40fd-9ab9-81333a45b3b2","project_id":"prj_13308687-729b-4461-9749-9628e7774540","title":"Confirm API behavior in local reproduction","description":"","status":"todo","priority":3,"due_at":null,"estimate_minutes":45,"created_at":"2026-10-16T09:45:30.072Z","updated_at":"2026-10-16T09:45:30.072Z","completed_at":null,"version":1,"completion_override_reason":null,"blocked_by":[],"ready":true},{"id":"tsk_d7cd5113-46b4-4b5b-bda1-36fc6bc8eb9d","project_id":"prj_13308687-729b-4461-9749-9628e7774540","title":"Implement verified API fix","description":"","status":"todo","priority":3,"due_at":null,"estimate_minutes":90,"created_at":"2026-10-16T09:45:30.178Z","updated_at":"2026-10-16T09:45:30.178Z","completed_at":null,"version":1,"completion_override_reason":null,"blocked_by":["tsk_410240c0-a14c-40fd-9ab9-81333a45b3b2"],"ready":false}]
+
+[exit 0]
+$ node '<repo>/src/cli.ts' --workspace <fixture>/private --json decision list
+[]
+
+[exit 0]
+$ node '<repo>/src/cli.ts' --workspace <fixture>/private --json calendar list
+[{"id":"evt_e483771c-b83b-4d52-8a63-d7180d4d2c8a","title":"Synthetic existing meeting","start_at":"2026-10-17T02:00:00.000Z","end_at":"2026-10-17T04:00:00.000Z","note":"","created_at":"2026-10-16T09:45:30.264Z","updated_at":"2026-10-16T09:45:30.264Z","version":1,"status":"scheduled"},{"id":"evt_b35c0bc6-097a-4d2e-9155-559c72c21869","title":"Synthetic client commitment","start_at":"2026-10-19T02:00:00.000Z","end_at":"2026-10-19T05:00:00.000Z","note":"","created_at":"2026-10-16T09:45:30.348Z","updated_at":"2026-10-16T09:45:30.348Z","version":1,"status":"scheduled"}]
+
+[exit 0]
+$ node '<repo>/src/cli.ts' --workspace <fixture>/private --json schedule list
+[]
+
+[exit 0]
+
+
+## Actual final response
+Menurut gue **belum worth pindah fokus penuh ke SaaS sekarang**. Target lo di workspace adalah kerja fullstack dalam tiga bulan, waktu fokus minggu depan cuma lima jam, sementara SaaS belum punya pelanggan atau validasi masalah.
+
+OSS punya jalur lebih pendek ke bukti kerja TypeScript/React/Node: kontribusi yang bisa ditinjau orang lain. Tapi hasilnya juga belum terbukti—baru ada draft PR dokumentasi, belum ada accepted code PR, dan repo utama belum dipilih. Jadi rekomendasi gue: pertahankan OSS sebagai eksperimen kecil untuk bukti kemampuan, sambil beresin portfolio existing; jangan memperbesar dua komitmen sekaligus. SaaS bisa kasih ownership produk yang lebih lengkap, tapi sekarang biaya validasi, distribusi, dan maintenance-nya bakal bersaing dengan fokus cari kerja.
+
+Gue bakal ubah rekomendasi kalau ada calon pengguna nyata dengan masalah berulang dan komitmen mencoba/membayar, atau kalau prioritas lo memang berubah dari cari kerja ke bisnis. Ini rekomendasi berdasarkan profil dan state sintetis yang gue cek hari ini; belum gue catat sebagai keputusan atau bikin task/jadwal baru.

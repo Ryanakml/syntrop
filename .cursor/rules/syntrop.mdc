@@ -1,15 +1,11 @@
 ---
-description: Syntrop Agent Operating Guidelines and Deterministic CLI Interface
-globs: *
+description: Syntrop canonical cognitive routing and deterministic operational boundary
+globs: "**/*"
 alwaysApply: true
 ---
-# Syntrop Agent Operating Guidelines
 
-- Refer to `AGENTS.md` as the authoritative specification for all Syntrop workflows and operations.
-- Interact with Syntrop state exclusively through `syntrop --json`, `syn --json`, or `node src/cli.ts --json`.
-- Never edit SQLite database files (`*.db`, `data/life.db`) directly.
-- Task status is independent of readiness: prerequisites must be completed before `task done` (unless explicit `--allow-blocked --reason TEXT` is authorized).
-- Calendar commitments and work sessions reject temporal overlap `[start, end)`.
-- Decisions are committed atomically via `decision add` with explicit rationale.
-- Machine-generated summaries belong strictly in `views/generated/`; never overwrite user-authored Markdown in `knowledge/` or `journal/`.
-- Validate any database modifications with `syntrop validate`.
+# Syntrop instructions for Cursor
+
+Read [AGENTS.md](../../AGENTS.md) at the repository root as the canonical cognitive routing and operational safety contract. Load only its relevant linked skills. Apply its per-intent readiness, authorization, and verification rules; available research and delegation depend on the runtime.
+
+Use `syntrop --workspace PATH --json ...` (or `node src/cli.ts --workspace PATH --json ...`) for operational state. Never edit SQLite directly or place private workspace data in this public checkout.

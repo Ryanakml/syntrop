@@ -10,7 +10,7 @@ Syntrop is an open-source, local-first personal operations engine built for AI c
 
 Before proposing changes, understand these non-negotiable architectural principles:
 1. **Zero Runtime Dependencies**: The core CLI engine relies strictly on Node.js 24 built-in modules (`node:sqlite`, `node:fs`, `node:crypto`, `node:os`). Do not introduce external runtime npm packages.
-2. **Deterministic Write Boundary**: The CLI is an air-gapped, deterministic state engine. It does **not** call LLM APIs, make external network requests, or run background daemon services. Cognitive reasoning belongs entirely in the calling agent runtime (guided by `AGENTS.md` and `skills/`).
+2. **Deterministic Write Boundary**: The CLI is a local, deterministic state engine. It does **not** call LLM APIs, make external network requests, or run background daemon services. Cognitive reasoning belongs entirely in the calling agent runtime (guided by `AGENTS.md` and `skills/`).
 3. **Physical Workspace Isolation**: The engine repository is distributable public code. Private user data (`data/life.db`, `knowledge/`, `journal/`) resides strictly in user-designated external directories (default `~/.syntrop`).
 4. **ACID Transactions & DAG Validation**: Operational state is authoritative in SQLite. Prerequisite completion, cycle prevention, and schedule overlap avoidance are validated at transaction commit.
 
@@ -64,6 +64,8 @@ npm run format
 # Run full test suite
 npm test
 ```
+
+For instruction changes, run the static cognitive contract checks included in `npm test`, then follow [the behavioral evaluation procedure](evals/README.md). Report real agent traces separately from static and CLI results; never label expected answers as observed behavior. See the [cognitive design](docs/cognitive-orchestration.md) for protocol ownership.
 
 ### Writing Tests
 - All automated tests use Node's native test runner (`node:test`) and live in `tests/*.test.mjs`.

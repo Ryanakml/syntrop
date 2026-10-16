@@ -1,6 +1,6 @@
 # Architecture and Data Contract
 
-Syntrop is an air-gapped, local-first operations engine designed to provide AI coding agents with verifiable state memory and deterministic tools.
+Syntrop is a local-first operations engine that gives AI coding agents persistent operational state and deterministic tools. The active runtime supplies judgment; it may use network services even though the CLI does not.
 
 ---
 
@@ -44,6 +44,29 @@ flowchart TD
 - **Deterministic Write Boundary (The CLI)**: The CLI does **not** call LLMs, make network requests, or run background daemons. It is a deterministic state machine.
 - **Non-Destructive View Generation**: Machine-compiled views write strictly to `views/generated/`. User-written notes elsewhere are never overwritten.
 
+### Cognitive orchestration (v0.2.0)
+
+[AGENTS.md](../AGENTS.md) is the canonical routing contract; thin runtime adapters point to it. Six existing skills provide specialist processes. Each independent intent gets a minimum sufficient path:
+
+```text
+User intent → readiness assessment
+  clear + authorized → direct action
+  material unknowns → inspect evidence → compare/recommend as needed
+  user-owned choice or missing authorization → concrete proposal → user decision
+  sufficiently mature plan → task decomposition → scheduling when requested
+Authorized CLI write → validate → read back → report → adapt when needed
+```
+
+`READY`, `NEEDS_EVIDENCE`, `NEEDS_DECISION`, `NEEDS_AUTHORIZATION`, and `BLOCKED` are cognitive classifications. They add no columns, migrations, CLI commands, or task statuses. Research and reasoning are conditional inputs to planning, not mandatory stages for every request. The agent inspects decision-changing ground truth before consequential planning and stops research when more evidence is unlikely to change the immediate decision.
+
+Instructions can guide model behavior but cannot enforce sound reasoning, guarantee consent recognition, or prove fresh-agent continuity. The CLI enforces its supported data invariants regardless of those cognitive judgments. [Behavior evaluations](../evals/README.md) therefore distinguish deterministic checks from observed agent behavior.
+
+### Scheduling readiness boundary
+
+Task `ready` reflects operational task/project state and prerequisites. Cognitive readiness describes whether an intent has enough evidence, decisions, and authorization; it is a separate concept. `task next` returns one ready task, not the entire ready queue.
+
+The scheduling engine permits reserving a future session for a task whose dependencies are unfinished. It rejects overlapping intervals and terminal/inactive targets, but does not prove the task will be ready by the session start. The agent must inspect prerequisites, estimates, existing commitments, and capacity before recommending time. Calendar availability is an upper bound, not proof of feasible execution.
+
 ---
 
 ## 2. Architectural Invariants
@@ -54,7 +77,7 @@ flowchart TD
 | **Prerequisite Completion** | `task done` verifies all prerequisite tasks are completed (`done`). | Exit `3` (Conflict): Unfinished prerequisites. Override requires `--allow-blocked --reason TEXT`. |
 | **Project Completion Guard** | `project update ID --status done` verifies all linked tasks are `done` or `cancelled`. | Exit `3` (Conflict): Open tasks remain. Override requires `--allow-open-tasks --reason TEXT`. |
 | **Temporal Conflict Rejection** | Half-open intervals `[start, end)` checked across active sessions and events. | Exit `3` (Conflict): Overlapping schedule interval. |
-| **Optimistic Concurrency** | Record `version` must match `--expected-version N` on updates. | Exit `3` (Conflict): Stale record version. |
+| **Optimistic Concurrency** | When `--expected-version N` is supplied, it must match the record version. The agent protocol requires it for supported updates to previously read records. | Exit `3` (Conflict): Stale record version. |
 | **Idempotency Guarantee** | Request fingerprint and cached response stored in `idempotency_keys` table. | Replay returns identical response; reusing key with different payload returns exit `3`. |
 | **Physical Isolation** | `assertOutsideSource(path)` checks realpath of workspace against source root. | Exit `2` (Validation): Cannot initialize private data inside repository checkout. |
 

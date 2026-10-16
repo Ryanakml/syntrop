@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-10-16
+
+Beta release; published with GitHub prerelease metadata. No npm publication.
+
+### Added
+- Per-intent epistemic readiness gate in the canonical agent contract, with direct-action fast paths and explicit evidence, decision, authorization, and blocked branches.
+- Artifact reconnaissance and planning smell tests, including legitimate research tasks and provisional-plan exceptions.
+- Reproducible synthetic behavioral scenarios, static contract checks, and trace-based evaluation procedure separating instruction integrity from observed LLM behavior.
+- Gemini CLI discovery adapter and evidence-backed cognitive architecture design.
+- Trace-backed evaluation report: 15 distinct scenarios exercised, one initial scope failure corrected and rerun; external-tool restriction scenario explicitly untested.
+
+### Changed
+- Six specialist skills compose around research/reasoning prerequisites, scoped permission, realistic scheduling, and recorded-outcome reflection.
+- Claude, Cursor, and Copilot adapters defer to one canonical protocol.
+- Documentation separates engine guarantees from prompt-guided behavior and runtime-specific discovery capabilities.
+- Package metadata includes cognitive protocol documentation and evaluation resources.
+
+### Compatibility
+- No database schema, migration, CLI command, or operational invariant changes.
+- Local-first storage, zero runtime dependencies, Node 24 requirement, and legacy `life` binary alias preserved.
+- Cognitive routing and authorization remain agent-guided; static/CLI checks do not establish universal model or runtime reliability.
+
 ## [0.1.0] - 2026-10-15
 
 ### Added
