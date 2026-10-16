@@ -29,7 +29,7 @@ Before proposing changes, understand these non-negotiable architectural principl
 ### Getting Started
 ```sh
 # 1. Clone your fork
-git clone https://github.com/<your-username>/LifeOs.git syntrop
+git clone https://github.com/<your-username>/syntrop.git
 cd syntrop
 
 # 2. Install development tools (Prettier, TypeScript compiler, Node type definitions)

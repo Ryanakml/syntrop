@@ -19,10 +19,10 @@ Always follow the operating guidelines, CLI interaction boundaries, and safety r
    - Proposing plans -> structured proposals.
    - Authorized changes -> atomic CLI execution with `--idempotency-key` and `--expected-version`.
 4. **Specialized Skills**: Refer to the focused skill guides in `skills/`:
-   - `skills/lifeos-planning/SKILL.md` — Goal decomposition, DAG task dependencies, readiness checks.
-   - `skills/lifeos-scheduling/SKILL.md` — Session scheduling, conflict rejection, and calendar commitments.
-   - `skills/lifeos-habits/SKILL.md` — Habit definition, frequency targets, and occurrence logging.
-   - `skills/lifeos-reflection/SKILL.md` — Objective weekly reviews, variance analysis (actual vs planned).
-   - `skills/lifeos-research/SKILL.md` — Fact-finding, evidence preservation with sources and timestamps.
-   - `skills/lifeos-reasoning/SKILL.md` — Consequential decisions recorded via `syntrop decision add`.
+   - `skills/syntrop-planning/SKILL.md` — Goal decomposition, DAG task dependencies, readiness checks.
+   - `skills/syntrop-scheduling/SKILL.md` — Session scheduling, conflict rejection, and calendar commitments.
+   - `skills/syntrop-habits/SKILL.md` — Habit definition, frequency targets, and occurrence logging.
+   - `skills/syntrop-reflection/SKILL.md` — Objective weekly reviews, variance analysis (actual vs planned).
+   - `skills/syntrop-research/SKILL.md` — Fact-finding, evidence preservation with sources and timestamps.
+   - `skills/syntrop-reasoning/SKILL.md` — Consequential decisions recorded via `syntrop decision add`.
 5. **Validation**: Verify database consistency after mutations using `syntrop validate`.

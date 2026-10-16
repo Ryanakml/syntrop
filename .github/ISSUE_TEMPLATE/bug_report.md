@@ -11,8 +11,8 @@ A clear and concise description of what the bug is.
 
 ## Reproduction Steps
 Steps to reproduce the behavior:
-1. Run `life init --workspace /tmp/test-ws`
-2. Run `life ...`
+1. Run `syntrop init --workspace /tmp/test-ws`
+2. Run `syntrop ...`
 3. See error
 
 ## Expected Behavior
@@ -21,10 +21,10 @@ A clear and concise description of what you expected to happen.
 ## Environment Information
 - **OS**: [e.g. macOS 15.1, Ubuntu 24.04]
 - **Node.js Version**: [e.g. v24.21.0] (Run `node -v`)
-- **LifeOS Version**: [e.g. 0.1.0]
-- **Life Doctor Output**:
+- **Syntrop Version**: [e.g. 0.1.0]
+- **Syntrop Doctor Output**:
   ```json
-  // Paste output of `life doctor`
+  // Paste output of `syntrop doctor`
   ```
 
 ## Relevant Output / Stack Trace

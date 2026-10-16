@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 
-const workspace = join(mkdtempSync(join(tmpdir(), 'lifeos-demo-')), 'my-life');
+const workspace = join(mkdtempSync(join(tmpdir(), 'syntrop-demo-')), 'my-syntrop');
 const cli = resolve('src/cli.ts');
 function life(...args) {
   const result = spawnSync(process.execPath, [cli, '--workspace', workspace, '--json', ...args], {

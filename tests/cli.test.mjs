@@ -16,7 +16,7 @@ import { DatabaseSync } from 'node:sqlite';
 
 const cli = resolve('src/cli.ts');
 function fixture(t) {
-  const root = mkdtempSync(join(tmpdir(), 'lifeos-test-'));
+  const root = mkdtempSync(join(tmpdir(), 'syntrop-test-'));
   t.after(() => rmSync(root, { recursive: true, force: true }));
   const workspace = join(root, 'private');
   function call(...args) {

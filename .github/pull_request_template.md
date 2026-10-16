@@ -7,7 +7,7 @@ Why is this change required? What issue does it resolve?
 ## Architectural Checklist
 - [ ] Strictly zero new runtime npm dependencies (built exclusively on Node 24 core modules).
 - [ ] No LLM API calls or non-deterministic logic introduced into the CLI write boundary.
-- [ ] Preserves separation of public code from private workspaces (`~/.lifeos`).
+- [ ] Preserves separation of public code from private workspaces (`~/.syntrop`).
 - [ ] State mutations run inside SQLite `BEGIN IMMEDIATE` transactions.
 - [ ] Timestamps require explicit ISO 8601 offsets.
 

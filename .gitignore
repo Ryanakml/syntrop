@@ -1,6 +1,7 @@
 node_modules/
 *.tsbuildinfo
-# Private LifeOS workspaces and personal files accidentally placed in this checkout.
+# Private Syntrop workspaces and personal files accidentally placed in this checkout.
+/.syntrop/
 /.lifeos/
 /my-life/
 /workspace/

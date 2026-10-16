@@ -1,6 +1,6 @@
 ---
-name: lifeos-research
-description: Investigate external facts for a LifeOS decision when current evidence, source quality, or uncertainty matters.
+name: syntrop-research
+description: Investigate external facts for a Syntrop decision when current evidence, source quality, or uncertainty matters.
 ---
 
 # Research

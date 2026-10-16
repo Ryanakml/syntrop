@@ -53,12 +53,12 @@ Different coding agents discover project instructions through different conventi
 
 Syntrop includes six focused operational skills in `skills/`:
 
-- [lifeos-planning](../skills/lifeos-planning/SKILL.md): Goal-to-task decomposition, DAG dependency validation, and task readiness.
-- [lifeos-scheduling](../skills/lifeos-scheduling/SKILL.md): Work session allocation, calendar commitment management, and half-open conflict checks.
-- [lifeos-habits](../skills/lifeos-habits/SKILL.md): Habit design, target tracking, and occurrence logging.
-- [lifeos-reflection](../skills/lifeos-reflection/SKILL.md): Weekly reviews, scheduled vs actual time analysis, and objective reflection.
-- [lifeos-research](../skills/lifeos-research/SKILL.md): External fact-finding and evidence gathering with observation dates and source URLs.
-- [lifeos-reasoning](../skills/lifeos-reasoning/SKILL.md): Evaluating complex trade-offs, opportunity costs, and committing `decision add`.
+- [syntrop-planning](../skills/syntrop-planning/SKILL.md): Goal-to-task decomposition, DAG dependency validation, and task readiness.
+- [syntrop-scheduling](../skills/syntrop-scheduling/SKILL.md): Work session allocation, calendar commitment management, and half-open conflict checks.
+- [syntrop-habits](../skills/syntrop-habits/SKILL.md): Habit design, target tracking, and occurrence logging.
+- [syntrop-reflection](../skills/syntrop-reflection/SKILL.md): Weekly reviews, scheduled vs actual time analysis, and objective reflection.
+- [syntrop-research](../skills/syntrop-research/SKILL.md): External fact-finding and evidence gathering with observation dates and source URLs.
+- [syntrop-reasoning](../skills/syntrop-reasoning/SKILL.md): Evaluating complex trade-offs, opportunity costs, and committing `decision add`.
 
 ---
 

@@ -5,7 +5,7 @@
   <p><em>An air-gapped, zero-dependency SQLite DAG engine that transforms conversational AI reasoning into verified, conflict-free personal execution.</em></p>
 
   <p>
-    <a href="https://github.com/Ryanakml/syntrop/actions"><img src="https://github.com/Ryanakml/syntrop/actions/workflows/ci.yml/badge.svg" alt="CI Status" /></a>
+    <a href="https://github.com/ryanakml/syntrop/actions"><img src="https://github.com/ryanakml/syntrop/actions/workflows/ci.yml/badge.svg" alt="CI Status" /></a>
     <a href="https://nodejs.org/"><img src="https://img.shields.io/badge/node-%3E%3D24.15-brightgreen.svg?style=flat-square" alt="Node Version" /></a>
     <a href="package.json"><img src="https://img.shields.io/badge/runtime%20deps-0-blue.svg?style=flat-square" alt="0 Runtime Dependencies" /></a>
     <a href="docs/architecture.md"><img src="https://img.shields.io/badge/storage-SQLite%203%20ACID-orange.svg?style=flat-square" alt="Storage Engine" /></a>
@@ -97,7 +97,7 @@ node -v   # Must be >= 24.15.0
 
 ### 2. Setup
 ```sh
-git clone https://github.com/Ryanakml/syntrop.git
+git clone https://github.com/ryanakml/syntrop.git
 cd syntrop
 chmod +x src/cli.ts
 npm link   # Exposes `syntrop` (and alias `syn`) globally
