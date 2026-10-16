@@ -24,6 +24,7 @@
   "files": [
     "src",
     "skills",
+    "assets",
     "AGENTS.md",
     "README.md",
     "LICENSE"

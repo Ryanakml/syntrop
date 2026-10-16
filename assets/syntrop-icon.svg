@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0B0F19"/>
+      <stop offset="50%" stop-color="#080C14"/>
+      <stop offset="100%" stop-color="#030508"/>
+    </linearGradient>
+
+    <!-- Outer Border Gradient -->
+    <linearGradient id="borderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38BDF8" stop-opacity="0.6"/>
+      <stop offset="50%" stop-color="#6366F1" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#10B981" stop-opacity="0.5"/>
+    </linearGradient>
+
+    <!-- Vector Flow Gradients -->
+    <linearGradient id="cyanFlow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38BDF8"/>
+      <stop offset="100%" stop-color="#0284C7"/>
+    </linearGradient>
+
+    <linearGradient id="emeraldCore" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34D399"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+
+    <linearGradient id="indigoFlow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#818CF8"/>
+      <stop offset="100%" stop-color="#4F46E5"/>
+    </linearGradient>
+
+    <!-- Ambient Core Glow -->
+    <radialGradient id="pulseGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#10B981" stop-opacity="0.25"/>
+      <stop offset="60%" stop-color="#0284C7" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#080C14" stop-opacity="0"/>
+    </radialGradient>
+
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="12" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Container Squircle -->
+  <rect x="8" y="8" width="496" height="496" rx="112" fill="url(#bg)" stroke="url(#borderGrad)" stroke-width="3"/>
+
+  <!-- Radial Core Glow -->
+  <circle cx="256" cy="256" r="180" fill="url(#pulseGlow)"/>
+
+  <!-- Subtle Coordinate Lattice Lines -->
+  <g stroke="#1E293B" stroke-width="1.5" stroke-dasharray="4 6" opacity="0.4">
+    <line x1="120" y1="256" x2="392" y2="256"/>
+    <line x1="256" y1="120" x2="256" y2="392"/>
+    <circle cx="256" cy="256" r="130" fill="none"/>
+  </g>
+
+  <!-- The Topological S Nexus (Geometric Anti-Entropy Knot) -->
+  <g filter="url(#glow)">
+    <!-- Upper Intent Ribbon (Cyan) -->
+    <path d="M 160 200 L 256 144 L 352 200 L 352 248 L 256 192 L 208 220 Z" 
+          fill="url(#cyanFlow)" opacity="0.95"/>
+
+    <!-- Central Invariant Spine (Emerald Pulse) -->
+    <path d="M 208 220 L 256 192 L 304 220 L 304 292 L 256 320 L 208 292 Z" 
+          fill="url(#emeraldCore)" opacity="0.9"/>
+
+    <!-- Lower Execution Ribbon (Indigo) -->
+    <path d="M 304 292 L 256 320 L 160 264 L 160 312 L 256 368 L 352 312 Z" 
+          fill="url(#indigoFlow)" opacity="0.95"/>
+  </g>
+
+  <!-- Precision Topological Nodes (DAG Vertices) -->
+  <g>
+    <!-- Top Node (Strategy) -->
+    <circle cx="256" cy="144" r="8" fill="#38BDF8"/>
+    <circle cx="256" cy="144" r="14" fill="none" stroke="#38BDF8" stroke-width="2" opacity="0.6"/>
+
+    <!-- Right Node (Reasoning) -->
+    <circle cx="352" cy="200" r="7" fill="#818CF8"/>
+    <circle cx="352" cy="312" r="7" fill="#818CF8"/>
+
+    <!-- Left Node (Input) -->
+    <circle cx="160" cy="200" r="7" fill="#38BDF8"/>
+    <circle cx="160" cy="312" r="7" fill="#34D399"/>
+
+    <!-- Bottom Node (Execution) -->
+    <circle cx="256" cy="368" r="8" fill="#10B981"/>
+    <circle cx="256" cy="368" r="14" fill="none" stroke="#10B981" stroke-width="2" opacity="0.6"/>
+
+    <!-- Center Invariant Core (ACID Heart) -->
+    <circle cx="256" cy="256" r="10" fill="#00FF88"/>
+    <circle cx="256" cy="256" r="20" fill="none" stroke="#00FF88" stroke-width="2.5" opacity="0.75"/>
+  </g>
+</svg>

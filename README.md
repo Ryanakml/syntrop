@@ -1,14 +1,29 @@
-# Syntrop
+<div align="center">
+  <img src="assets/syntrop-icon.svg" width="132" height="132" alt="Syntrop - The Deterministic Operations Kernel for AI Coding Agents" />
+  <h1>SYNTROP</h1>
+  <p><strong>The Deterministic Operations Kernel for AI Coding Agents</strong></p>
+  <p><em>An air-gapped, zero-dependency SQLite DAG engine that transforms conversational AI reasoning into verified, conflict-free personal execution.</em></p>
 
-**Deterministic Operational Memory for Humans and AI Agents.**
+  <p>
+    <a href="https://github.com/Ryanakml/syntrop/actions"><img src="https://github.com/Ryanakml/syntrop/actions/workflows/ci.yml/badge.svg" alt="CI Status" /></a>
+    <a href="https://nodejs.org/"><img src="https://img.shields.io/badge/node-%3E%3D24.15-brightgreen.svg?style=flat-square" alt="Node Version" /></a>
+    <a href="package.json"><img src="https://img.shields.io/badge/runtime%20deps-0-blue.svg?style=flat-square" alt="0 Runtime Dependencies" /></a>
+    <a href="docs/architecture.md"><img src="https://img.shields.io/badge/storage-SQLite%203%20ACID-orange.svg?style=flat-square" alt="Storage Engine" /></a>
+    <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square" alt="License" /></a>
+    <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/release-v0.1.0-yellow.svg?style=flat-square" alt="Release" /></a>
+  </p>
 
-[![Node Version](https://img.shields.io/badge/node-%3E%3D24.15-brightgreen.svg?style=flat-square)](https://nodejs.org/)
-[![Runtime Dependencies](https://img.shields.io/badge/runtime%20dependencies-0-blue.svg?style=flat-square)](package.json)
-[![Storage Engine](https://img.shields.io/badge/storage-SQLite%203%20ACID-orange.svg?style=flat-square)](docs/architecture.md)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
-[![Status](https://img.shields.io/badge/status-beta%20v0.1.0-yellow.svg?style=flat-square)](CHANGELOG.md)
+  <p>
+    <a href="#the-problem-agent-amnesia--plan-rot"><b>The Problem</b></a> &nbsp;•&nbsp;
+    <a href="#dual-layer-architecture"><b>Architecture</b></a> &nbsp;•&nbsp;
+    <a href="#quick-start"><b>Quick Start</b></a> &nbsp;•&nbsp;
+    <a href="#agent-integration"><b>Agent Integration</b></a> &nbsp;•&nbsp;
+    <a href="docs/cli-reference.md"><b>CLI Manual</b></a>
+  </p>
+</div>
 
 ---
+
 
 ## The Problem: Agent Amnesia & Plan Rot
 
