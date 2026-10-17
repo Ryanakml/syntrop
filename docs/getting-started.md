@@ -151,7 +151,7 @@ Open your preferred coding agent inside this repository and paste:
 
 A clear authorized request can proceed directly. A consequential plan may first need inspection or a recommendation. These are agent workflow choices, not new database statuses. Asking for a proposal does not authorize saving tasks or sessions. For later authorized updates, the agent reads state, uses `--expected-version` for supported updates to seen records, applies changes, validates, and reads them back; retry writes use `--idempotency-key`.
 
-The CLI does not invoke AI or send network requests. Your agent runtime may use remote services; review its own privacy settings. Instruction files do not guarantee reasoning quality or autonomous continuity. [Behavior evaluations](../evals/README.md) describe what was and was not tested.
+Core CLI commands do not invoke AI or send network requests. Explicit Google integration network operations are optional and separately authorized. Your agent runtime may use remote services; review its own privacy settings. Instruction files do not guarantee reasoning quality or autonomous continuity. [Behavior evaluations](../evals/README.md) describe what was and was not tested.
 
 ---
 
@@ -169,3 +169,17 @@ syntrop restore --from "$HOME/syntrop-backup-20261015" --workspace "$HOME/restor
 ```
 
 For more details on CLI commands, refer to the [CLI Reference](cli-reference.md).
+
+
+## 7. Optional visual calendar
+
+After you have local work sessions, you can publish an approved projection to Google Calendar without changing your offline workflow. Start with:
+
+```sh
+syntrop integration google setup
+syntrop integration google status
+```
+
+`setup` without a client prints the onboarding steps and makes no network request. Follow the [Google Calendar setup guide](integrations/google-calendar.md) to create your Google Cloud Desktop OAuth client, consent in the system browser, choose privacy and habit display, preview, and approve the first sync. A task deadline is an optional all-day marker, not a work session. Flexible habit reminders are selected explicitly and remain separate from `habit log` completion.
+
+Google Calendar web/mobile and Notion Calendar can show the same dedicated Google calendars. There is no separate Notion API, background sync, or bidirectional editing. OAuth secrets and integration settings are kept outside workspace backups. Live account onboarding and calendar UI have not yet been verified; a normal account-owner consent flow is required before that evidence can be obtained.

@@ -1,6 +1,6 @@
 # Architecture and Data Contract
 
-Syntrop is a local-first operations engine that gives AI coding agents persistent operational state and deterministic tools. The active runtime supplies judgment; it may use network services even though the CLI does not.
+Syntrop is a local-first operations engine that gives AI coding agents persistent operational state and deterministic tools. The active runtime supplies judgment; it may use network services. Core CLI operations remain offline; explicit optional Google integration commands have a separate network and authorization boundary.
 
 ---
 
@@ -41,7 +41,7 @@ flowchart TD
 ### Authorities and Boundaries
 - **Operational Authority (SQLite)**: Tasks, goals, projects, work sessions, calendar events, habits, and decisions are stored exclusively in SQLite (`data/life.db`). SQLite enforces foreign keys, unique occurrence constraints, version numbers, and index integrity.
 - **Narrative Authority (Markdown)**: Free-form user thinking, observation logs, meeting transcripts, and energy preferences live in `knowledge/` and `journal/`.
-- **Deterministic Write Boundary (The CLI)**: The CLI does **not** call LLMs, make network requests, or run background daemons. It is a deterministic state machine.
+- **Deterministic Write Boundary (The CLI)**: Core operations make no network requests and do not invoke LLMs or background daemons. Explicit Google integration commands can authorize, read, or publish a calendar projection; they do not change the core scheduling authority.
 - **Non-Destructive View Generation**: Machine-compiled views write strictly to `views/generated/`. User-written notes elsewhere are never overwritten.
 
 ### Cognitive orchestration (v0.2.0)
@@ -100,3 +100,14 @@ When migrating from earlier schema versions, Syntrop automatically invokes SQLit
   Uses Node 24 native SQLite `backup` API to produce a clean, transactionally consistent snapshot of `data/life.db`, copying non-database files recursively. Never performs raw file copies on live WAL databases.
 - **`syntrop restore --from DIRECTORY --workspace NEW_PATH`**:
   Inspects SQLite integrity (`PRAGMA integrity_check`), verifies schema version, and provisions a fresh workspace. Refuses to overwrite existing files.
+
+
+## 5. Optional calendar projection (v0.3.0 beta)
+
+`src/google-cli.ts` isolates opt-in commands from core operations. `google-projection.ts` maps a read-only operational snapshot; `google-auth.ts` handles Desktop PKCE consent and restricted secret files; `google-client.ts` provides bounded API calls; `google-sync.ts` reconciles workspace-owned events. No core schema migration or mandatory hosted service is introduced.
+
+Google is a visual projection, not operational authority. Dedicated Focus and Habits calendars are created only when an approved plan needs them. Each authenticated preview reads current Google state, returns an approval hash, and makes no local-file or remote-calendar writes. Sync rechecks the hash, applies conditional writes, and reads back results. Changed owned events use full event replacement (`PUT`) with ETag `If-Match`, avoiding stale omitted fields from patch semantics. Cross-service operations are not atomic; partial failures require a new preview. External edits/deletions become conflicts, recurring exceptions require manual resolution, and unrelated events are never matched by title.
+
+OAuth configuration, credentials, calendar IDs, mappings, and projection preferences live outside the operational workspace under `~/.syntrop-google/<workspace-path-hash>/`. Ordinary backups intentionally omit them. A restored workspace at another path does not silently acquire remote-write access. Default disconnect removes tokens; optional revocation is distinct and can fail remotely. Neither deletes calendars or operational records.
+
+See [calendar design and primary-source research](calendar-design.md) for least-privilege scopes, lifecycle policies, colors, recurrence, backup risks, and recovery. [Onboarding](integrations/google-calendar.md) requires a user-owned Desktop client and consent. Unit/client/sync simulations are separate from live Google OAuth/API and visible Google/Notion verification; the latter remain uncompleted in this beta's initial implementation evidence.

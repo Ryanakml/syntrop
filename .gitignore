@@ -27,3 +27,9 @@ node_modules/
 *.sqlite3-shm
 *.sqlite3-wal
 .DS_Store
+
+# Integration credentials must never enter source control.
+/.syntrop-google/
+client_secret_*.json
+oauth-client.json
+tokens.json

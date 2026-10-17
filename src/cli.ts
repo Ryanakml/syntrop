@@ -73,6 +73,21 @@ Decisions: decision add --title TEXT --rationale TEXT [--project ID] [--source-u
 Views:     today | tomorrow | week [--date YYYY-MM-DD] [--write]
 Review:    review week [--date YYYY-MM-DD] [--json]
 
+Google (optional): integration google setup [--client FILE] | connect [--freebusy] | status
+           configure [--title-mode redacted|titles] [--deadlines true|false] [--commitments true|false]
+                     [--categories FILE] [--exclude-commitments ID,ID]
+           habit --id ID --mode none|flexible|timed [--start-date DATE] [--time HH:MM --duration MINUTES --weekdays MO,TU]
+                 [--reminder-minutes N]
+           preview [--offline] [--from DATE --through DATE] [--resolve local]
+           sync --approve PREVIEW_HASH [--from DATE --through DATE] [--resolve local]
+           calendars | colors | availability --calendars ID,ID --start ISO_OFFSET --end ISO_OFFSET
+           recover [--focus CALENDAR_ID] [--habits CALENDAR_ID] | disconnect [--revoke]
+Google status/setup/configure/habit/calendars/offline-preview are local integration operations.
+connect uses system-browser OAuth; colors/availability/online-preview read Google (preview never writes events).
+sync writes Google only after a matching preview approval. recover reads Google and repairs local integration metadata.
+disconnect removes local tokens; --revoke also revokes Google authorization. These never modify Syntrop records.
+Core task/calendar/habit operations remain offline; manual Google synchronization is optional.
+
 Database mutation commands accept --idempotency-key KEY. Times require an explicit offset,
 for example 2026-10-15T09:00+07:00. --json emits one JSON value; errors use stderr
 and exit codes 2 (input), 3 (conflict), 4 (workspace/storage).`;
@@ -80,7 +95,17 @@ and exit codes 2 (input), 3 (conflict), 4 (workspace/storage).`;
 function parse(args: string[]): Parsed {
   const words: string[] = [],
     options: Options = {};
-  const flags = new Set(['json', 'write', 'correct', 'help', 'allow-blocked', 'allow-open-tasks']);
+  const flags = new Set([
+    'json',
+    'write',
+    'correct',
+    'help',
+    'allow-blocked',
+    'allow-open-tasks',
+    'freebusy',
+    'offline',
+    'revoke',
+  ]);
   for (let i = 0; i < args.length; i++) {
     const value = args[i]!;
     if (!value.startsWith('--')) {
@@ -265,6 +290,31 @@ async function main(): Promise<void> {
     );
   const json = Boolean(options.json),
     path = workspacePath(option(options, 'workspace'));
+  if (noun === 'integration') {
+    const context = openWorkspace(path);
+    try {
+      const { googleCommand } = await import('./google-cli.ts');
+      output(await googleCommand(context, words, options), json);
+    } catch (error) {
+      if (error instanceof LifeError) throw error;
+      const safe = error as {
+        name?: string;
+        code?: string;
+        status?: number;
+        reason?: string;
+        message?: string;
+      };
+      if (safe.name === 'GoogleAuthError' || safe.name === 'GoogleApiError')
+        throw new LifeError(safe.code ?? 'GOOGLE_API', safe.message ?? 'Google operation failed');
+      throw new LifeError(
+        'GOOGLE_INTEGRATION',
+        'Google integration operation failed; inspect configuration and retry. No operational records were changed.',
+      );
+    } finally {
+      context.db.close();
+    }
+    return;
+  }
   if (noun === 'init') {
     assertOptions(options, ['timezone']);
     const defaultTimezone =

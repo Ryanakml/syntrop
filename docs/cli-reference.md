@@ -6,7 +6,7 @@ This document provides a comprehensive reference for all commands, flags, argume
 
 ## 1. Global Options & Conventions
 
-Every command supports the following global options:
+Workspace/output/help options are shared. Concurrency and idempotency flags apply only to supported core mutations; Google integration flags are listed separately below.
 
 | Flag | Type | Description |
 | :--- | :--- | :--- |
@@ -193,3 +193,50 @@ Generates a structured weekly reflection packet:
 - Analyzes planned vs actual session minutes.
 - Separates recorded outcomes from unrecorded past sessions (marked as `unknown`).
 - Summarizes completed tasks, active habits, and recent decisions.
+
+---
+
+## 9. Optional Google integration
+
+These commands never change operational tasks, sessions, commitments, or habit logs. Core commands remain offline. Integration settings and tokens live outside the workspace and normal backups. The `--idempotency-key` and `--expected-version` flags apply to supported core mutations; Google commands use stable remote IDs, ETags, an operation lock, and preview approval instead, and reject those two flags.
+
+| Command after `syntrop integration google` | Options | Effects |
+| --- | --- | --- |
+| `setup` | `[--client FILE]` | Local. Without client, print setup steps; with Desktop client JSON, store private config. |
+| `connect` | `[--freebusy]` | Network and system-browser consent; stores OAuth tokens. Does not upload schedule. |
+| `status` | None | Local cached configuration/scope/token status; no verified email or remote access claim. |
+| `configure` | `[--title-mode redacted\|titles] [--deadlines true\|false] [--commitments true\|false] [--categories FILE] [--exclude-commitments ID1,ID2]` | Local projection settings only. |
+| `habit` | `--id ID --mode none\|flexible\|timed [--start-date DATE] [--time HH:MM] [--duration N] [--weekdays MO,TU] [--reminder-minutes N]` | Local selection of a habit's calendar representation; no habit occurrence write. |
+| `preview` | `[--from DATE] [--through DATE] [--offline] [--resolve local]` | Authenticated remote reads by default; no local-file or remote-calendar writes. Offline mode performs no network access. |
+| `sync` | `--approve PLAN_HASH [--from DATE] [--through DATE] [--resolve local]` | Fresh-state check then approved remote calendar/event writes and local mapping checkpoints. |
+| `calendars` | None | Local managed calendar IDs only, not a personal-calendar enumeration. |
+| `colors` | None | Network read of supported Google palettes. |
+| `availability` | `--calendars ID1,ID2 --start ISO_OFFSET --end ISO_OFFSET` | Optional free/busy network read; no event titles or local schedule writes. |
+| `recover` | `[--focus ID] [--habits ID]` | Read remote calendar metadata and save verified owned IDs locally. At least one role required. |
+| `disconnect` | `[--revoke]` | Remove local tokens; optional network revocation. Keep operational data and remote calendars/events. |
+
+Run with an initialized workspace, for example `syntrop --workspace /absolute/path --json integration google status`. See [Desktop OAuth setup and troubleshooting](integrations/google-calendar.md); no credentials are bundled. Default scope is `calendar.app.created`; `connect --freebusy` additionally requests `calendar.events.freebusy`. Changing scopes uses another consent flow. External Testing-mode tokens can expire after seven days.
+
+### Projection settings
+
+Default title mode is `redacted`, deadline markers are disabled, commitments enabled, and no habits selected. Titles mode publishes sanitized short record titles; detailed notes and knowledge stay local. `--categories FILE` reads a JSON object mapping existing project IDs to `career`, `oss`, `learning`, `review`, or `default`; it replaces the entire mapping. `--exclude-commitments` replaces the exclusion list; pass an empty string to clear it. It prevents publishing a local copy of a meeting already displayed elsewhere; there is no automatic external meeting import/deduplication.
+
+Habit mode `none` requires only ID and mode. Other modes require `--start-date YYYY-MM-DD`; timed mode additionally requires time and positive duration in minutes, plus explicit weekdays for weekly habits. Flexible daily is a transparent all-day series; flexible weekly without weekdays is a transparent Monday-to-Sunday week marker. Reminders are disabled by default; optional popup minutes must be `0..40320`. Configuring a reminder does not record habit completion. Native recurrence can extend beyond the preview range, and series changes affect the whole series, including historical recurrence patterns.
+
+### Preview and publication
+
+Dates are inclusive workspace dates. Default is today through six days later; maximum window is 90 days. A deadline uses workspace timezone and exclusive next-day end. A task without deadline or session creates no appointment. Previously managed events remain reconciled when their local dates move outside the initial publication window; a range is not a deletion sweep. Google instance exceptions are always conflicts requiring manual resolution.
+
+```sh
+syntrop --json integration google preview --from 2026-10-19 --through 2026-10-25
+# Review returned actions, summary, calendarsToCreate and approval.
+syntrop --json integration google sync --from 2026-10-19 --through 2026-10-25 --approve PLAN_HASH
+```
+
+Replace dates and `PLAN_HASH` with your actual reviewed plan. Offline preview returns `remoteChecked: false` and `approval: null`; it cannot authorize sync. Authenticated preview can refresh a token only in memory. Changed local/remote state invalidates approval. Review remote drift before explicitly choosing `--resolve local` on both preview and sync. It restores the local projection and never imports Google edits. Owned event changes use full replacement with `PUT` and `If-Match`; unrelated events are untouched. Do not silently overwrite changes based only on a previous general sync request.
+
+Sync reports `created`, `updated`, `cancelled`, `unchanged`, `skipped`, `conflicted`, `failed`, and sanitized failures. Any failed/conflicted actions set exit code `3` even if independent actions succeeded; inspect those counts rather than assuming a returned result means complete success. Integration validation uses exit `2`, other raised auth/API/storage errors generally exit `4` with a specific code in the existing JSON error envelope. Bounded HTTP retries apply only where replay is safe; a network failure can mean an uncertain write and is surfaced for fresh-preview recovery. Calendar creation is not blindly replayed.
+
+Missing/uncertain calendar IDs need `recover` with the actual ID from Google Calendar settings. Recovery checks the description's workspace-and-role marker and creates no calendars. Keep the separate integration directory; mapping loss can use event ownership metadata, while losing registry/configuration needs explicit recovery. Disconnect does not delete remote projections; `--revoke` reports `revocationFailed` honestly.
+
+Mapping/client/fake-provider/CLI simulations are not live Google tests. Initial beta account authorization, real API smoke, and Google/Notion visible UI verification remain **NOT COMPLETED**. There is no continuous sync, direct Notion API, bidirectional operational editing, or automatic habit completion.

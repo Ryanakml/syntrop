@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-10-17
+
+Calendar Integration beta. Google OAuth consent, live API smoke, and human-visible calendar QA are **not completed**: no account-owner Desktop OAuth client is available. This is not a production-readiness claim.
+
+### Added
+- Optional `integration google` CLI boundary: Desktop OAuth setup/connect/status/disconnect, configuration, habit selection, online/offline preview, approval-hash sync, managed calendar recovery, colors, and optional external free/busy.
+- Least-privilege `calendar.app.created` authorization with PKCE S256, random loopback redirect, state/Host/origin validation, refresh/reconnect handling, and fixed Google endpoints.
+- Credentials and projection state in a separate private directory outside operational workspace backups/exports; restrictive file permissions and sanitized errors.
+- Dedicated Focus/Habits calendars, redacted-by-default titles, disabled default reminders, explicit project palette mapping, optional all-day deadlines, opted-in flexible/timed native habit recurrence.
+- Stable Google-valid IDs, private ownership metadata, paginated reconciliation, drift/deletion conflicts, ETag conditional updates, verified writes, partial-progress checkpoints, and safe interrupted calendar creation recovery.
+- Pure mapping, mocked HTTP/OAuth callback, fake-provider synchronization, and complete mocked CLI workflow regression coverage; live verification remains separately blocked.
+
+### Changed
+- Existing CLI core operations remain offline; explicitly invoked Google integration commands can use the network. Local `calendar` commands retain their original semantics.
+- Scheduling/habit instructions compose with opt-in preview, external availability, privacy and publishing boundaries.
+- Calendar design, beginner Google Cloud onboarding, recovery, Notion/mobile viewing, compatibility and validation documentation added.
+
+### Limitations
+- Manual one-way projection only; no continuous daemon or unrestricted bidirectional sync.
+- Recurring instance exceptions require manual resolution in Google. Whole-series changes use provider series semantics and can affect prior displayed occurrences; habit occurrence logs remain local and unchanged.
+- Original downloaded Desktop client files must be stored outside source/workspace; no bundled client, credentials, mandatory hosted backend, or npm publication.
+- No core schema/migration changes. Optional ICS snapshot export deferred to prioritize the authenticated path.
+
 ## [0.2.0] - 2026-10-16
 
 Beta release; published with GitHub prerelease metadata. No npm publication.

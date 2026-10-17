@@ -9,8 +9,8 @@ Syntrop is an open-source, local-first personal operations engine built for AI c
 ## 1. Architectural Invariants
 
 Before proposing changes, understand these non-negotiable architectural principles:
-1. **Zero Runtime Dependencies**: The core CLI engine relies strictly on Node.js 24 built-in modules (`node:sqlite`, `node:fs`, `node:crypto`, `node:os`). Do not introduce external runtime npm packages.
-2. **Deterministic Write Boundary**: The CLI is a local, deterministic state engine. It does **not** call LLM APIs, make external network requests, or run background daemon services. Cognitive reasoning belongs entirely in the calling agent runtime (guided by `AGENTS.md` and `skills/`).
+1. **Zero Runtime Dependencies**: The core CLI engine relies strictly on Node.js 24 built-in modules (`node:sqlite`, `node:fs`, `node:crypto`, `node:os`). Avoid unnecessary external runtime packages; justify and audit a maintained dependency when security or maintainability requires it. Dependency count is not a security guarantee.
+2. **Deterministic Write Boundary**: Core CLI operations are local and deterministic. They do **not** call LLM APIs, make external network requests, or run background daemon services. Explicit optional `integration google` operations may use the network; never introduce network activity into unrelated core commands. Cognitive reasoning belongs entirely in the calling agent runtime (guided by `AGENTS.md` and `skills/`).
 3. **Physical Workspace Isolation**: The engine repository is distributable public code. Private user data (`data/life.db`, `knowledge/`, `journal/`) resides strictly in user-designated external directories (default `~/.syntrop`).
 4. **ACID Transactions & DAG Validation**: Operational state is authoritative in SQLite. Prerequisite completion, cycle prevention, and schedule overlap avoidance are validated at transaction commit.
 
@@ -66,6 +66,12 @@ npm test
 ```
 
 For instruction changes, run the static cognitive contract checks included in `npm test`, then follow [the behavioral evaluation procedure](evals/README.md). Report real agent traces separately from static and CLI results; never label expected answers as observed behavior. See the [cognitive design](docs/cognitive-orchestration.md) for protocol ownership.
+
+### Calendar integration evidence
+
+Keep mapping tests, mocked OAuth/HTTP tests, fake-provider reconciliation, simulated CLI workflows, live Google smoke tests, and visible calendar QA distinct. A synthetic loopback callback does not establish Google's actual consent behavior. The initial v0.3.0 work has no account-owner OAuth client/consent; live Google API and Google/Notion UI verification remain uncompleted. Do not imply production readiness from offline tests.
+
+Follow [the calendar design](docs/calendar-design.md) and [Google setup guide](docs/integrations/google-calendar.md). Use disposable synthetic workspaces and explicitly authorized test resources for live tests; never run against a real schedule by default. Preserve ownership markers, idempotent IDs, pagination, ETag preconditions, and zero-mutation previews. Test full-replacement event updates and uncertain/partial write recovery, not just successful inserts. Verify credentials remain outside workspace backups, packaging, output, and Git history. Public fixtures must contain no private calendar data or credentials.
 
 ### Writing Tests
 - All automated tests use Node's native test runner (`node:test`) and live in `tests/*.test.mjs`.

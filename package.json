@@ -1,7 +1,7 @@
 {
   "name": "syntrop",
-  "version": "0.2.0",
-  "description": "Deterministic, local-first operational memory engine for AI coding agents. SQLite + DAGs + conflict-checked schedule.",
+  "version": "0.3.0",
+  "description": "Local-first operational memory engine with deterministic scheduling and optional Google Calendar projection.",
   "private": true,
   "license": "MIT",
   "type": "module",
