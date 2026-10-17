@@ -39,7 +39,7 @@ Official discovery documentation was checked on 2026-10-16. This establishes doc
 
 The portable contract is explicit reading through `AGENTS.md`. Repository `skills/` files are not universally auto-discovered or globally installed. Optional native skill installation is runtime-specific and outside the default setup.
 
-## 3. Six specialist skills
+## 3. Seven specialist skills
 
 | Skill | Responsibility and composition |
 | :--- | :--- |
@@ -47,7 +47,8 @@ The portable contract is explicit reading through `AGENTS.md`. Repository `skill
 | [Reasoning](../skills/syntrop-reasoning/SKILL.md) | Compare alternatives, tradeoffs, and user-owned choices; recommend before committing. Request more research only when it can change the choice. |
 | [Planning](../skills/syntrop-planning/SKILL.md) | Turn sufficiently mature outcomes into executable tasks and dependencies; detect unresolved thinking disguised as work. |
 | [Scheduling](../skills/syntrop-scheduling/SKILL.md) | Allocate time against readiness, prerequisite timing, energy, buffers, and existing commitments. |
-| [Habits](../skills/syntrop-habits/SKILL.md) | Design and track behavior; use the fast path for clear authorized additions and logs. |
+| [Habits](../skills/syntrop-habits/SKILL.md) | Design and track behavior; use the fast path for clear authorized additions and logs, and project daily/weekly habits as completable Google Tasks when opted in. |
+| [Calendar Presentation](../skills/syntrop-calendar-presentation/SKILL.md) | Design concise display titles (`shortName`, `shortTitle`), custom HEX label palettes, and Task vs Event assignment without mutating full operational records. |
 | [Reflection](../skills/syntrop-reflection/SKILL.md) | Review observed outcomes and revise assumptions; feed research, decisions, or replanning only when warranted. |
 
 Skills are instructions, not autonomous agents. If the runtime supports independent specialists, optional delegation can accelerate substantial independent investigations. Use bounded briefs and permissions, keep shared operational writes with the coordinating agent, reconcile conflicting evidence, and disclose unavailable capabilities. Otherwise use the same workflow sequentially.
@@ -77,16 +78,16 @@ You are my operations partner using Syntrop.
 For behavioral scenarios, scoring, and the distinction between instruction checks and observed agent behavior, see [the evaluation guide](../evals/README.md).
 
 
-## 6. Optional Google Calendar workflow
+## 6. Optional Google Calendar & Tasks workflow
 
-Calendar publication is a separate authorization boundary from saving local records. Asking for a proposal does not authorize OAuth consent, local scheduling, or remote event creation. Conversely, “save and sync” can authorize local persistence and the reviewed remote projection; do not repeatedly request routine permission already granted. The account owner completes Google's browser consent, never token-paste in chat. Check `integration google status` locally, but do not treat its cached status as proof of remote validity or account email.
+Calendar and Tasks publication is a separate authorization boundary from saving local records. Asking for a proposal does not authorize OAuth consent, local scheduling, or remote event/task creation. Conversely, “save and sync” or an explicit per-workspace standing authorization (`integration google configure --auto-sync true --auto-reconcile true`) authorizes the active agent to run preview, sync (`--auto`), and completion reconciliation (`reconcile --auto`) within normal operational turns without repeatedly prompting for routine permission. Standing authorization is agent-driven (not a background daemon) and never overrides remote conflicts silently.
 
-For “sync next week's schedule,” inspect the local schedule, validate it, run an authenticated `integration google preview --from DATE --through DATE`, inspect exact actions and conflicts, and use `integration google sync` with those same dates and `--approve` hash only within the user's publication authorization. Verify the returned create/update/cancel/failure counts and remote read-back results. A stale approval needs a new preview. `--offline` only shows local projection and cannot authorize a sync. Partial success is not total success; reread before retrying.
+For “sync next week's schedule,” inspect the local schedule, validate it, run an authenticated `integration google preview --from DATE --through DATE`, inspect exact calendar/task actions and conflicts, and use `integration google sync` with those same dates and `--approve` hash (or `--auto` when standing auto-sync is enabled and zero conflicts exist). Verify the returned create/update/cancel/failure counts and remote read-back results. A stale approval needs a new preview. `--offline` only shows local projection and cannot authorize a sync. Partial success is not total success; reread before retrying.
 
-Remote drift is not permission to overwrite. Recommend preserving a Google edit or restoring local authority; `--resolve local` must be explicitly authorized for the reviewed conflict and supplied to both preview and sync. Recurring-instance exceptions remain conflicts even with that flag. Native series updates affect the entire recurrence, including its historical pattern. Lost registries require explicit ownership-checked recovery; do not recreate calendars blindly or delete events by title.
+For “check what I completed today” or reconciling checked-off Google Tasks and habits, run `integration google reconcile --preview` (or `integration google reconcile --auto` when standing auto-reconcile is enabled). Task completion reconciliation enforces Syntrop's DAG prerequisite checks, active project status, and version checks, cancelling only future scheduled sessions while preserving past session history (`session_outcomes` are never fabricated from task checkboxes). Habit occurrence completion uses the mapped local `occurrenceDate` in the workspace timezone rather than raw UTC completion timestamps. Unchecked completed tasks/habits or blocked tasks are surfaced as conflicts requiring explicit user review.
 
-For “find free time,” combine local commitments and sessions with `integration google availability --calendars IDS --start ISO_OFFSET --end ISO_OFFSET` only when optional free/busy access is granted. Managed projection calendars are rejected to prevent double counting. Unavailable/failed calendars mean unknown availability, not free time. Busy intervals do not establish energy, task readiness, or permission to schedule.
+For calendar presentation design, load [syntrop-calendar-presentation](../skills/syntrop-calendar-presentation/SKILL.md) when onboarding a workspace, adding new projects/categories, or redesigning visual styling. Persist concise `shortName` / `shortTitle` overrides and custom `#RRGGBB` labels via `integration google presentation --file FILE`, then reuse that saved configuration across subsequent syncs without re-designing on every turn.
 
-For “show Duolingo without choosing a time,” configure that habit as `flexible` with an explicit start date; do not invent a timed session. Weekly flexible mode is a transparent week-level reminder; weekly timed mode needs explicit weekdays. Reminders are projections, never habit completion evidence. `calendar list` still retrieves local commitments, while `integration google calendars` returns only known managed IDs.
+For migrating an existing v0.3.0 workspace to v0.4.0, configure `tasksPolicy` and habit `mode: 'tasks'`, run `integration google migrate --preview`, present the summary for explicit user approval, and execute `integration google migrate --approve HASH`. Migration creates and verifies replacement Google Tasks and habit occurrences before retiring old Calendar habit reminder series.
 
-Use [the integration setup guide](integrations/google-calendar.md) for exact commands and [the design](calendar-design.md) for privacy, scopes, and lifecycle behavior. Core remains offline; Google/Notion UI compatibility is documented, not live-verified. Never claim a mocked API or synthetic callback proves real Google authorization.
+Use [the integration setup guide](integrations/google-calendar.md) for exact commands and [the design](calendar-design.md) for privacy, scopes, custom event labels, and lifecycle behavior.

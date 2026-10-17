@@ -5,7 +5,15 @@ import { dirname, resolve } from 'node:path';
 
 const root = resolve('.');
 const read = (path) => readFileSync(resolve(root, path), 'utf8');
-const skills = ['research', 'reasoning', 'planning', 'scheduling', 'habits', 'reflection'];
+const skills = [
+  'research',
+  'reasoning',
+  'planning',
+  'scheduling',
+  'habits',
+  'reflection',
+  'calendar-presentation',
+];
 const adapters = [
   'CLAUDE.md',
   'GEMINI.md',
@@ -23,7 +31,7 @@ test('all runtime adapters discover the same canonical cognitive contract', () =
   }
 });
 
-test('six specialist skills have matching frontmatter, reachable links, and canonical routing', () => {
+test('specialist skills have matching frontmatter, reachable links, and canonical routing', () => {
   for (const skill of skills) {
     const path = `skills/syntrop-${skill}/SKILL.md`;
     const text = read(path);

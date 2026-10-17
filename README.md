@@ -10,7 +10,7 @@
     <a href="package.json"><img src="https://img.shields.io/badge/runtime%20deps-0-blue.svg?style=flat-square" alt="0 Runtime Dependencies" /></a>
     <a href="docs/architecture.md"><img src="https://img.shields.io/badge/storage-SQLite%203%20ACID-orange.svg?style=flat-square" alt="Storage Engine" /></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square" alt="License" /></a>
-    <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/release-v0.3.0-yellow.svg?style=flat-square" alt="Release" /></a>
+    <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/release-v0.4.0-yellow.svg?style=flat-square" alt="Release" /></a>
   </p>
 
   <p>
@@ -131,22 +131,26 @@ syntrop task done <TASK_1_ID>
 
 ---
 
-## Optional Google Calendar projection
+## Optional Google Calendar & Tasks Integration
 
-View approved local schedules in **Syntrop · Focus** and selected reminders in **Syntrop · Habits**, using Google Calendar on web/mobile or the same Google account in Notion Calendar. Sync is manual and one way; Syntrop remains authoritative. Work sessions are timed busy events, optional deadlines are free all-day markers, and flexible habits never invent a clock time. Task notes and knowledge files stay local; titles are redacted by default.
+Syntrop remains the operational source of truth while projecting each concept into its native Google Workspace representation:
+- **Google Calendar Events (`Syntrop · Focus`)**: Reserved time blocks for scheduled work sessions (`[start, end)`) and commitments, styled with agent-designed concise display titles (`Project · Short Title`) and custom HEX event labels (`labelProperties.eventLabels` + `eventLabelId`, with automatic fallback to standard `colorId` palette entries).
+- **Native Google Tasks (`Syntrop · Tasks` & `Syntrop · Habits`)**: Actionable Syntrop tasks and individually completable daily/weekly habit occurrences projected over a bounded rolling horizon (default 14 days).
+- **Controlled Completion Reconciliation (`Google Tasks -> Syntrop`)**: Checking off a managed Google Task or habit occurrence can be reconciled back into Syntrop via `integration google reconcile`, enforcing DAG prerequisites, active project guards, version checks, and local-timezone occurrence dates without fabricating work-session outcomes.
 
 ```sh
-syntrop integration google setup
 syntrop integration google setup --client /absolute/path/desktop-client.json
 syntrop integration google connect
-syntrop --json integration google preview --from 2026-10-19 --through 2026-10-25
-# Review the actual plan, replace PLAN_HASH with its approval value:
-syntrop integration google sync --from 2026-10-19 --through 2026-10-25 --approve PLAN_HASH
+syntrop integration google configure --title-mode titles --tasks-enabled true --tasks-mode actionable
+syntrop integration google habit --id HABIT_ID --mode tasks --start-date 2026-10-17 --horizon-days 14
+syntrop --json integration google preview --from 2026-10-17 --through 2026-10-23
+syntrop --json integration google sync --from 2026-10-17 --through 2026-10-23 --approve PLAN_HASH
+# Reconcile tasks and habits completed in Google Calendar / Google Tasks:
+syntrop --json integration google reconcile --preview
+syntrop --json integration google reconcile --approve RECONCILE_HASH
 ```
 
-Replace the dates with your intended window. OAuth uses your own Google Cloud Desktop client and system-browser consent; connecting alone uploads no schedule. Each sync requires a fresh approved preview. External edits become conflicts, and only workspace-owned projections are changed. Credentials live outside operational workspace backups. Core commands still work without Google.
-
-**Beta evidence boundary:** mapping, mocked-client, fake-provider, and simulated CLI tests do not establish live Google authorization or a rendered calendar. Live OAuth, real API smoke, and Google/Notion visual QA have **not been completed** because an account-owner client and consent are unavailable. See the [setup guide](docs/integrations/google-calendar.md), [design decision](docs/calendar-design.md), and [validation report](evals/calendar-2026-10-17.md). No direct Notion API or automatic habit completion is claimed.
+Upgrading from v0.3.0 preserves existing Focus calendar event IDs, creates replacement Google Tasks and habit task occurrences first, and retires redundant Calendar habit series only after replacement tasks are verified (`syntrop integration google migrate --preview`). Optional per-workspace standing authorization (`--auto-sync true --auto-reconcile true`) lets your active AI agent synchronize and reconcile within normal operational turns without a background daemon. See the [Google Calendar & Tasks guide](docs/integrations/google-calendar.md) and [architecture design](docs/calendar-design.md).
 
 ---
 
@@ -177,7 +181,7 @@ Thin adapters point each runtime to that protocol:
 * **Codex**: [AGENTS.md](AGENTS.md).
 * **Other runtimes, including Antigravity**: explicitly ask the agent to read `AGENTS.md`; automatic discovery is unverified.
 
-The six [skills](skills/) provide focused workflows and are read as needed through `AGENTS.md`. They do not install themselves or create subagents. See the [integration guide](docs/agent-integration.md) for documented discovery mechanisms and runtime verification limits.
+The seven [skills](skills/) provide focused workflows—including [calendar presentation design](skills/syntrop-calendar-presentation/SKILL.md)—and are read as needed through `AGENTS.md`. They do not install themselves or create subagents. See the [integration guide](docs/agent-integration.md) for documented discovery mechanisms and runtime verification limits.
 
 ### Prompt Your Agent
 Open your agent inside this repository and paste:
@@ -197,7 +201,7 @@ For detailed setup, see the [Agent Integration Guide](docs/agent-integration.md)
 | **Sessions & Calendar** | `syntrop schedule add\|list\|move\|cancel\|record`, `syntrop calendar add\|list\|move\|cancel` |
 | **Habits** | `syntrop habit add\|list\|show\|update\|log\|history` |
 | **Decisions** | `syntrop decision add\|list\|show` |
-| **Optional Google Calendar** | `syntrop integration google setup\|connect\|status\|configure\|habit\|preview\|sync\|calendars\|colors\|availability\|recover\|disconnect` |
+| **Optional Google Integration** | `syntrop integration google setup\|connect\|status\|configure\|presentation\|habit\|tasks\|preview\|sync\|reconcile\|migrate\|diagnose\|calendars\|colors\|availability\|recover\|disconnect` |
 | **Views & Reviews** | `syntrop today`, `syntrop tomorrow`, `syntrop week`, `syntrop review week` |
 
 *All commands support `--json` for structured output and exit codes `0` (ok), `2` (validation), `3` (conflict), and `4` (workspace).*  
@@ -211,8 +215,8 @@ For full syntax, see the [CLI Reference](docs/cli-reference.md).
 - [CLI Reference](docs/cli-reference.md) — Complete command flags, options, exit codes, and JSON schemas.
 - [Architecture & Invariants](docs/architecture.md) — Invariant specifications, migrations, and concurrency model.
 - [Agent Integration Guide](docs/agent-integration.md) — Multi-agent setup, prompt patterns, and skills catalog.
-- [Google Calendar Setup](docs/integrations/google-calendar.md) — Desktop OAuth, preview, sync, privacy, and Notion Calendar viewing.
-- [Calendar Architecture](docs/calendar-design.md) — Scope decisions, ownership, reconciliation, and live verification limits.
+- [Google Calendar & Tasks Setup](docs/integrations/google-calendar.md) — Desktop OAuth, Tasks projection, completion reconciliation, presentation themes, and v0.3.0 migration.
+- [Calendar & Tasks Architecture](docs/calendar-design.md) — Scope decisions, ownership, custom event labels, reconciliation, and API capability boundaries.
 - [Behavior Evaluation Guide](evals/README.md) — Scenario fixtures, scoring, and limits of behavioral evidence.
 - [Contributing Guidelines](CONTRIBUTING.md) — Development environment, testing, and pull request process.
 - [Security Policy](SECURITY.md) — Responsible disclosure and threat model.
@@ -221,12 +225,13 @@ For full syntax, see the [CLI Reference](docs/cli-reference.md).
 
 ## Current Status & Limitations
 
-Syntrop is currently in **Beta (v0.3.0)**.
+Syntrop is currently in **Beta (v0.4.0)**.
 - **Local-First & Single-User**: Designed for single-user local disk operations. Multi-device sync is handled via external backup or personal git repositories.
 - **Node 24 Requirement**: Leverages `node:sqlite` and native TypeScript type stripping; requires Node.js >= 24.15.0 < 25.
-- **Manual Calendar Integration**: Google projection is optional; no bidirectional import or continuous sync. Browser consent and actual remote/UI behavior remain unverified live.
-- **No Autonomous Daemon**: Syntrop does not run background services or send push notifications. Review and replanning occur when initiated by the user or agent.
-- **Agent-Guided Judgment**: Evidence checks and planning readiness are instructions for the active agent, not engine guarantees. The CLI can reserve future sessions for dependency-blocked tasks; the agent must check readiness and prerequisite timing before proposing a session.
+- **Controlled Google Synchronization**: Calendar and Tasks projection is opt-in and agent- or user-driven; there is no background daemon or unrestricted bidirectional editing. Only verified completion signals on workspace-owned Google Tasks and habit occurrences are reconciled into Syntrop.
+- **Google Tasks API Boundaries**: The public Google Tasks API v1 stores date-only `due` fields (discarding time-of-day), does not expose recurring-rule creation via the REST API, and does not support custom per-task HEX colors. Syntrop projects bounded dated habit occurrences and uses Calendar events for timed blocks.
+- **No Autonomous Daemon**: Syntrop does not run background services or send push notifications. Review, synchronization, and reconciliation occur when initiated by the user or active agent.
+- **Agent-Guided Judgment**: Evidence checks, presentation design, and planning readiness are instructions for the active agent, not engine guarantees. The CLI can reserve future sessions for dependency-blocked tasks; the agent must check readiness and prerequisite timing before proposing a session.
 - **Evaluation Boundaries**: Engine tests verify deterministic behavior. Scenario fixtures and instruction checks do not prove reliable behavior across models or runtimes; see [evals](evals/README.md).
 - **Zero Built-in LLM Dependencies**: Syntrop does not bundle proprietary LLM tokens or API keys. Reasoning is driven by the user's active AI agent runtime.
 

@@ -21,6 +21,7 @@ import { fileURLToPath } from 'node:url';
 
 export const GOOGLE_SCOPE = 'https://www.googleapis.com/auth/calendar.app.created';
 export const FREEBUSY_SCOPE = 'https://www.googleapis.com/auth/calendar.events.freebusy';
+export const TASKS_SCOPE = 'https://www.googleapis.com/auth/tasks';
 const AUTH = 'https://accounts.google.com/o/oauth2/v2/auth';
 const TOKEN = 'https://oauth2.googleapis.com/token';
 const REVOKE = 'https://oauth2.googleapis.com/revoke';
@@ -209,7 +210,7 @@ function getClient(home: string) {
     );
   return validateClient(c);
 }
-function getTokens(home: string): Tokens {
+function getTokens(home: string, requireTasks = false): Tokens {
   const t = readPrivate<Tokens>(home, 'tokens.json');
   if (!t) fail('NOT_CONNECTED', 'Google is not connected. Run integration google connect.');
   if (
@@ -222,8 +223,14 @@ function getTokens(home: string): Tokens {
     typeof t.scope !== 'string'
   )
     fail('INVALID_TOKENS', 'Google credentials are invalid. Reconnect.');
-  if (!t.scope.split(' ').includes(GOOGLE_SCOPE))
+  const granted = t.scope.split(' ');
+  if (!granted.includes(GOOGLE_SCOPE))
     fail('MISSING_SCOPE', 'Google authorization is missing calendar.app.created; reconnect.');
+  if (requireTasks && !granted.includes(TASKS_SCOPE))
+    fail(
+      'MISSING_SCOPE',
+      'Google authorization is missing https://www.googleapis.com/auth/tasks; run integration google connect to grant Tasks permission.',
+    );
   return t;
 }
 export function status(home: string) {
@@ -238,7 +245,9 @@ export function status(home: string) {
       t.scope.split(' ').includes(GOOGLE_SCOPE),
     scopes:
       typeof t?.scope === 'string'
-        ? t.scope.split(' ').filter((s) => s === GOOGLE_SCOPE || s === FREEBUSY_SCOPE)
+        ? t.scope
+            .split(' ')
+            .filter((s) => s === GOOGLE_SCOPE || s === FREEBUSY_SCOPE || s === TASKS_SCOPE)
         : [],
     expiresAt: t && Number.isFinite(t.expires_at) ? new Date(t.expires_at).toISOString() : null,
   };
@@ -314,9 +323,14 @@ function tokensFrom(body: Record<string, unknown>, previous?: Tokens): Tokens {
 }
 export async function getAccessToken(
   home: string,
-  options: { persist?: boolean; forceRefresh?: boolean; fetch?: typeof fetch } = {},
+  options: {
+    persist?: boolean;
+    forceRefresh?: boolean;
+    requireTasks?: boolean;
+    fetch?: typeof fetch;
+  } = {},
 ): Promise<string> {
-  const t = getTokens(home);
+  const t = getTokens(home, options.requireTasks);
   if (!options.forceRefresh && t.expires_at > Date.now() + 60_000) return t.access_token;
   const c = getClient(home);
   const params = new URLSearchParams({
@@ -326,6 +340,11 @@ export async function getAccessToken(
   });
   if (c.client_secret) params.set('client_secret', c.client_secret);
   const next = tokensFrom(await tokenRequest(params, options.fetch ?? fetch), t);
+  if (options.requireTasks && !next.scope.split(' ').includes(TASKS_SCOPE))
+    fail(
+      'MISSING_SCOPE',
+      'Google authorization is missing https://www.googleapis.com/auth/tasks; run integration google connect to grant Tasks permission.',
+    );
   if (options.persist !== false) writePrivate(home, 'tokens.json', next);
   return next.access_token;
 }
@@ -341,6 +360,7 @@ export async function connect(
   home: string,
   options: {
     freebusy?: boolean;
+    tasks?: boolean;
     onUrl?: (url: string) => void;
     timeoutMs?: number;
     launchBrowser?: boolean;
@@ -424,16 +444,22 @@ export async function connect(
     fail('LOOPBACK_FAILED', 'Cannot start OAuth listener.');
   const redirect = `http://127.0.0.1:${address.port}/oauth2callback`;
   const url = new URL(AUTH);
+  const existing = readPrivate<Tokens>(home, 'tokens.json');
   for (const [key, val] of Object.entries({
     client_id: c.client_id,
     redirect_uri: redirect,
     response_type: 'code',
-    scope: [GOOGLE_SCOPE, ...(options.freebusy ? [FREEBUSY_SCOPE] : [])].join(' '),
+    scope: [
+      GOOGLE_SCOPE,
+      ...(options.tasks ? [TASKS_SCOPE] : []),
+      ...(options.freebusy ? [FREEBUSY_SCOPE] : []),
+    ].join(' '),
     state,
     code_challenge: createHash('sha256').update(verifier).digest('base64url'),
     code_challenge_method: 'S256',
     access_type: 'offline',
     prompt: 'consent',
+    ...(options.tasks ? { include_granted_scopes: 'true' } : {}),
   }))
     url.searchParams.set(key, val);
   const timer = setTimeout(
@@ -455,9 +481,11 @@ export async function connect(
       grant_type: 'authorization_code',
     });
     if (c.client_secret) params.set('client_secret', c.client_secret);
-    const t = tokensFrom(await tokenRequest(params, options.fetch ?? fetch));
+    const t = tokensFrom(await tokenRequest(params, options.fetch ?? fetch), existing);
     if (options.freebusy && !t.scope.split(' ').includes(FREEBUSY_SCOPE))
       fail('MISSING_SCOPE', 'Google did not grant requested free/busy permission; reconnect.');
+    if (options.tasks && !t.scope.split(' ').includes(TASKS_SCOPE))
+      fail('MISSING_SCOPE', 'Google did not grant requested Tasks permission; reconnect.');
     writePrivate(home, 'tokens.json', t);
     return status(home);
   } finally {

@@ -73,20 +73,31 @@ Decisions: decision add --title TEXT --rationale TEXT [--project ID] [--source-u
 Views:     today | tomorrow | week [--date YYYY-MM-DD] [--write]
 Review:    review week [--date YYYY-MM-DD] [--json]
 
-Google (optional): integration google setup [--client FILE] | connect [--freebusy] | status
+Google (optional): integration google setup [--client FILE] | connect [--freebusy] [--calendar-only] | status | diagnose
            configure [--title-mode redacted|titles] [--deadlines true|false] [--commitments true|false]
-                     [--categories FILE] [--exclude-commitments ID,ID]
-           habit --id ID --mode none|flexible|timed [--start-date DATE] [--time HH:MM --duration MINUTES --weekdays MO,TU]
-                 [--reminder-minutes N]
+                     [--categories FILE] [--presentation FILE] [--exclude-commitments ID,ID]
+                     [--tasks-enabled true|false] [--tasks-mode actionable|scheduled|selected|ready|none]
+                     [--include-backlog true|false] [--habit-horizon DAYS]
+                     [--auto-sync true|false] [--auto-reconcile true|false]
+           presentation [--file FILE] [--reset]
+           habit --id ID --mode none|flexible|timed|tasks [--start-date DATE] [--time HH:MM --duration MINUTES --weekdays MO,TU]
+                 [--reminder-minutes N] [--horizon-days DAYS] [--short-name TEXT] [--label KEY]
+           tasks [--offline] [--lists] [--from DATE --through DATE] [--enabled true|false] [--mode MODE]
+                 [--task-ids ID,ID] [--project-ids ID,ID] [--include-backlog true|false] [--habit-horizon DAYS]
+                 [--tasks-list-title TEXT] [--habits-list-title TEXT]
            preview [--offline] [--from DATE --through DATE] [--resolve local]
            sync --approve PREVIEW_HASH [--from DATE --through DATE] [--resolve local]
+           reconcile [--preview] [--approve HASH] [--correct-habits]
+           migrate [--preview] [--approve HASH] [--from DATE --through DATE] [--resolve local]
            calendars | colors | availability --calendars ID,ID --start ISO_OFFSET --end ISO_OFFSET
-           recover [--focus CALENDAR_ID] [--habits CALENDAR_ID] | disconnect [--revoke]
-Google status/setup/configure/habit/calendars/offline-preview are local integration operations.
-connect uses system-browser OAuth; colors/availability/online-preview read Google (preview never writes events).
-sync writes Google only after a matching preview approval. recover reads Google and repairs local integration metadata.
-disconnect removes local tokens; --revoke also revokes Google authorization. These never modify Syntrop records.
-Core task/calendar/habit operations remain offline; manual Google synchronization is optional.
+           recover [--focus CALENDAR_ID] [--habits CALENDAR_ID] [--tasks-list LIST_ID] [--habits-list LIST_ID]
+           disconnect [--revoke]
+Google status/setup/configure/presentation/habit/calendars/diagnose/offline-preview are local integration operations.
+connect uses system-browser OAuth; colors/availability/online-preview/tasks read Google (preview never writes).
+sync and migrate write Google only after a matching preview approval. reconcile imports verified Google Task completions
+into Syntrop through standard dependency and habit rules. recover repairs local integration metadata.
+disconnect removes local tokens; --revoke also revokes Google authorization.
+Core task/calendar/habit operations remain offline; Google synchronization is optional.
 
 Database mutation commands accept --idempotency-key KEY. Times require an explicit offset,
 for example 2026-10-15T09:00+07:00. --json emits one JSON value; errors use stderr
@@ -103,7 +114,14 @@ function parse(args: string[]): Parsed {
     'allow-blocked',
     'allow-open-tasks',
     'freebusy',
+    'calendar-only',
     'offline',
+    'preview',
+    'dry-run',
+    'auto',
+    'correct-habits',
+    'reset',
+    'lists',
     'revoke',
   ]);
   for (let i = 0; i < args.length; i++) {
@@ -1019,9 +1037,14 @@ main().catch((error) => {
   const code = error instanceof LifeError ? error.code : 'INTERNAL';
   const exit = ['VALIDATION', 'NOT_FOUND'].includes(code)
     ? 2
-    : ['CONFLICT', 'CYCLE', 'SCHEDULE_CONFLICT', 'STALE_VERSION', 'IDEMPOTENCY_CONFLICT'].includes(
-          code,
-        )
+    : [
+          'CONFLICT',
+          'CYCLE',
+          'SCHEDULE_CONFLICT',
+          'STALE_VERSION',
+          'IDEMPOTENCY_CONFLICT',
+          'CONFIRMATION_REQUIRED',
+        ].includes(code)
       ? 3
       : 4;
   const json = process.argv.includes('--json');

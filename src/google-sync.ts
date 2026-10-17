@@ -1,9 +1,18 @@
 import { createHash } from 'node:crypto';
 import { LifeError } from './db.ts';
-import { addDays, localDate } from './time.ts';
-import { eventFingerprint, eventIdentity, projectEvents } from './google-projection.ts';
+import { addDays, dateKey, localDate } from './time.ts';
+import {
+  COLORS,
+  desiredCalendarLabels,
+  eventFingerprint,
+  eventIdentity,
+  labelIdentity,
+  nearestColorId,
+  projectEvents,
+} from './google-projection.ts';
 import type {
   GoogleEvent,
+  GoogleEventLabel,
   GoogleTransport,
   Projection,
   ProjectionConfig,
@@ -16,6 +25,8 @@ export type CalendarRegistry = {
   focus?: string;
   habits?: string;
   pending?: CalendarRole;
+  labelCapability?: 'supported' | 'unsupported';
+  labels?: Record<string, GoogleEventLabel>;
 };
 export type Mapping = {
   calendarId: string;
@@ -45,6 +56,8 @@ export type SyncPlan = {
   calendarsToCreate: CalendarRole[];
   actions: SyncAction[];
   summary: Record<string, number>;
+  labelsToSync?: GoogleEventLabel[];
+  labelMode?: 'custom-labels' | 'colorId-fallback' | 'palette';
 };
 const encoded = encodeURIComponent;
 export const calendarPath = (id: string) => `/calendars/${encoded(id)}`;
@@ -92,6 +105,7 @@ function desiredForTracked(
   config: ProjectionConfig,
   key: string,
   colors: Record<string, unknown>,
+  activeLabelIds?: Record<string, string>,
 ): Projection | undefined {
   const [type, id] = key.split(':');
   const record =
@@ -106,7 +120,7 @@ function desiredForTracked(
   const instant = String(type === 'deadline' ? (record.due_at ?? '') : (record.start_at ?? ''));
   if (!instant) return undefined;
   const date = localDate(instant, snapshot.timezone);
-  return projectEvents(snapshot, config, date, addDays(date, 1), colors).find(
+  return projectEvents(snapshot, config, date, addDays(date, 1), colors, activeLabelIds).find(
     (item) => item.key === key,
   );
 }
@@ -145,7 +159,11 @@ function retired(snapshot: Snapshot, config: ProjectionConfig, key: string): boo
   if (type === 'habit') {
     const row = snapshot.habits.find((r) => r.id === id);
     return Boolean(
-      row && (!row.active || !config.habits[id!] || config.habits[id!]?.mode === 'none'),
+      row &&
+      (!row.active ||
+        !config.habits[id!] ||
+        config.habits[id!]?.mode === 'none' ||
+        config.habits[id!]?.mode === 'tasks'),
     );
   }
   return false;
@@ -159,6 +177,61 @@ function unexpectedExtras(event: GoogleEvent): boolean {
     (event.eventType && event.eventType !== 'default'),
   );
 }
+
+/** Merge workspace-managed custom labels with any unrelated existing calendar labels. */
+export function mergeCalendarLabels(
+  existing: GoogleEventLabel[],
+  wanted: Record<string, GoogleEventLabel>,
+  workspaceId: string,
+): GoogleEventLabel[] {
+  const managedIds = new Set(Object.keys(wanted).map((key) => labelIdentity(workspaceId, key)));
+  const preserved = existing.filter((item) => item.id && !managedIds.has(item.id));
+  const merged = [...preserved, ...Object.values(wanted)];
+  if (Object.keys(wanted).length > 25 || merged.length > 200)
+    throw new LifeError('VALIDATION', 'Google Calendar supports at most 25 custom eventLabels');
+  return merged;
+}
+
+function fallbackColorForKey(
+  snapshot: Snapshot,
+  config: ProjectionConfig,
+  key: string,
+  colors: Record<string, unknown>,
+): string | undefined {
+  const [type, id] = key.split(':');
+  let labelKey = 'default';
+  let fallback = COLORS.default!;
+  if (type === 'session') {
+    const session = snapshot.work_sessions.find((s) => String(s.id) === id);
+    const task = session
+      ? snapshot.tasks.find((t) => String(t.id) === String(session.task_id))
+      : undefined;
+    const projectId = task?.project_id ? String(task.project_id) : '';
+    labelKey =
+      (task ? config.presentation?.tasks?.[String(task.id)]?.label : undefined) ??
+      config.presentation?.projects?.[projectId]?.label ??
+      config.categories[projectId] ??
+      config.presentation?.defaults?.sessionLabel ??
+      'default';
+  } else if (type === 'commitment') {
+    labelKey = config.presentation?.defaults?.commitmentLabel ?? 'default';
+  } else if (type === 'deadline') {
+    labelKey = config.presentation?.defaults?.deadlineLabel ?? 'review';
+    fallback = '8';
+  } else if (type === 'habit') {
+    labelKey =
+      config.presentation?.habits?.[id!]?.label ??
+      config.presentation?.defaults?.habitLabel ??
+      'habit';
+    fallback = '10';
+  }
+  const custom = config.presentation?.theme?.labels?.[labelKey];
+  const colorId = custom
+    ? (custom.colorId ?? nearestColorId(custom.color, colors))
+    : (COLORS[labelKey] ?? fallback);
+  return Object.hasOwn(colors, colorId) ? colorId : undefined;
+}
+
 export async function planSync(
   provider: GoogleTransport,
   snapshot: Snapshot,
@@ -184,8 +257,19 @@ export async function planSync(
   } catch (error) {
     if (![403, 404].includes(statusOf(error))) throw error;
   }
+
+  const wantedLabels = desiredCalendarLabels(config);
+  const hasCustomLabels = Object.keys(wantedLabels).length > 0;
+  const useCustomLabels = hasCustomLabels && registry.labelCapability !== 'unsupported';
+  const activeLabelIds = useCustomLabels
+    ? Object.fromEntries(Object.entries(wantedLabels).map(([k, v]) => [k, v.id]))
+    : undefined;
+
   const desired = new Map(
-    projectEvents(snapshot, config, from, through, colors).map((item) => [item.key, item]),
+    projectEvents(snapshot, config, from, through, colors, activeLabelIds).map((item) => [
+      item.key,
+      item,
+    ]),
   );
   const remoteByRole: Record<CalendarRole, GoogleEvent[]> = { focus: [], habits: [] };
   for (const role of ['focus', 'habits'] as const)
@@ -213,7 +297,7 @@ export async function planSync(
         remotes.find((e) => e.id === eventIdentity(config.workspaceId, key));
       let wanted = desired.get(key);
       if (!wanted && !key.startsWith('habit:'))
-        wanted = desiredForTracked(snapshot, config, key, colors);
+        wanted = desiredForTracked(snapshot, config, key, colors, activeLabelIds);
       const base: SyncAction = {
         kind: 'skip',
         key,
@@ -310,6 +394,40 @@ export async function planSync(
           const id = key.split(':')[1];
           const row = snapshot.habits.find((r) => r.id === id);
           const display = config.habits[id!];
+          if (display?.mode === 'tasks' && display.startDate) {
+            const taskStart = dateKey(display.startDate);
+            const remoteStartDate = remote.start?.dateTime
+              ? localDate(remote.start.dateTime, snapshot.timezone)
+              : (remote.start?.date ?? taskStart);
+            if (remoteStartDate >= taskStart) {
+              actions.push({
+                ...base,
+                kind: 'cancel',
+                reason:
+                  'Habit migrated to native Google Tasks; no prior Calendar occurrences to preserve',
+              });
+              continue;
+            }
+            const dayBefore = addDays(taskStart, -1).replace(/-/g, '');
+            const untilValue = remote.start?.date ? dayBefore : `${dayBefore}T235959Z`;
+            const event = structuredClone(remote);
+            event.recurrence = remote.recurrence
+              .filter((r) => r.startsWith('RRULE:'))
+              .map((r) => r.replace(/;(UNTIL|COUNT)=[^;]*/g, '') + `;UNTIL=${untilValue}`);
+            event.extendedProperties = {
+              private: { ...remote.extendedProperties?.private, syntrop_stopped: '1' },
+            };
+            event.extendedProperties.private!.syntrop_hash = eventFingerprint(event);
+            actions.push({
+              ...base,
+              kind: 'update',
+              event,
+              stopped: true,
+              reason:
+                'Stop future Calendar habit reminders from task start date, preserve prior history',
+            });
+            continue;
+          }
           const changed = !row?.active
             ? String(row?.updated_at ?? now)
             : ((display as { changedAt?: string } | undefined)?.changedAt ??
@@ -392,7 +510,20 @@ export async function planSync(
   const approval = createHash('sha256')
     .update(JSON.stringify({ from, through, registry, config, actions, calendarsToCreate }))
     .digest('hex');
-  return { from, through, approval, calendarsToCreate: [...calendarsToCreate], actions, summary };
+  return {
+    from,
+    through,
+    approval,
+    calendarsToCreate: [...calendarsToCreate],
+    actions,
+    summary,
+    ...(hasCustomLabels
+      ? {
+          labelsToSync: Object.values(wantedLabels),
+          labelMode: useCustomLabels ? 'custom-labels' : 'colorId-fallback',
+        }
+      : {}),
+  };
 }
 
 export async function applySync(
@@ -403,6 +534,7 @@ export async function applySync(
   timezone: string,
   saveRegistry: (value: CalendarRegistry) => void,
   saveMappings: (value: MappingState) => void,
+  options: { snapshot?: Snapshot; config?: ProjectionConfig; skipHabitRetire?: boolean } = {},
 ): Promise<Record<string, unknown>> {
   const summary = {
     created: 0,
@@ -431,7 +563,66 @@ export async function applySync(
     delete registry.pending;
     saveRegistry(registry);
   }
+
+  let colors: Record<string, unknown> = {};
+  const wantedLabels = options.config ? desiredCalendarLabels(options.config) : {};
+  let labelFallbackActive = registry.labelCapability === 'unsupported';
+
+  if (Object.keys(wantedLabels).length > 0 && registry.focus) {
+    try {
+      colors =
+        (await provider.request<{ event?: Record<string, unknown> }>('GET', '/colors')).event ?? {};
+    } catch {
+      /* ignore optional palette fetch failure during fallback preparation */
+    }
+    const labelsUnchanged =
+      registry.labelCapability === 'supported' &&
+      JSON.stringify(registry.labels ?? {}) === JSON.stringify(wantedLabels);
+
+    if (!labelsUnchanged && registry.labelCapability !== 'unsupported') {
+      try {
+        const calMeta = await provider.request<{
+          labelProperties?: { eventLabels?: GoogleEventLabel[] };
+        }>('GET', calendarPath(registry.focus));
+        const existingLabels = calMeta.labelProperties?.eventLabels ?? [];
+        const merged = mergeCalendarLabels(existingLabels, wantedLabels, registry.workspaceId);
+        const patched = await provider.request<{
+          labelProperties?: { eventLabels?: GoogleEventLabel[] };
+        }>('PATCH', calendarPath(registry.focus), {
+          labelProperties: { eventLabels: merged },
+        });
+        const returnedIds = new Set(
+          (patched.labelProperties?.eventLabels ?? []).map((item) => item.id),
+        );
+        const allPresent = Object.values(wantedLabels).every((item) => returnedIds.has(item.id));
+        if (allPresent) {
+          registry.labelCapability = 'supported';
+          registry.labels = wantedLabels;
+          saveRegistry(registry);
+        } else {
+          registry.labelCapability = 'unsupported';
+          registry.labels = wantedLabels;
+          saveRegistry(registry);
+          labelFallbackActive = true;
+        }
+      } catch {
+        registry.labelCapability = 'unsupported';
+        registry.labels = wantedLabels;
+        saveRegistry(registry);
+        labelFallbackActive = true;
+      }
+    }
+  }
+
   for (const action of plan.actions) {
+    if (
+      options.skipHabitRetire &&
+      action.key.startsWith('habit:') &&
+      (action.kind === 'cancel' || action.stopped)
+    ) {
+      summary.skipped++;
+      continue;
+    }
     if (action.kind === 'conflict') {
       summary.conflicted++;
       continue;
@@ -469,45 +660,135 @@ export async function applySync(
         summary.cancelled++;
         continue;
       }
-      if (action.kind !== 'unchanged') {
-        const method = action.kind === 'create' ? 'POST' : 'PUT';
+
+      let effectiveEvent = action.event ? structuredClone(action.event) : undefined;
+      if (effectiveEvent && labelFallbackActive && effectiveEvent.eventLabelId) {
+        delete effectiveEvent.eventLabelId;
+        if (options.snapshot && options.config) {
+          const colorId = fallbackColorForKey(options.snapshot, options.config, action.key, colors);
+          if (colorId) effectiveEvent.colorId = colorId;
+        }
+        if (effectiveEvent.extendedProperties?.private) {
+          delete effectiveEvent.extendedProperties.private.syntrop_label;
+          effectiveEvent.extendedProperties.private.syntrop_hash = eventFingerprint(effectiveEvent);
+        }
+      }
+
+      if (action.kind !== 'unchanged' || (labelFallbackActive && action.event?.eventLabelId)) {
+        const isCreate = action.kind === 'create';
+        const method = isCreate ? 'POST' : 'PUT';
+        const useLabelParam = Boolean(effectiveEvent?.eventLabelId);
         const path =
-          eventPath(calendar, action.kind === 'create' ? undefined : action.remoteId!) +
-          '?sendUpdates=none&conferenceDataVersion=1';
+          eventPath(calendar, isCreate ? undefined : action.remoteId!) +
+          `?sendUpdates=none&conferenceDataVersion=1${useLabelParam ? '&eventLabelVersion=1' : ''}`;
+        const sendBody = (evt: GoogleEvent) =>
+          Object.fromEntries(
+            Object.entries(evt).filter(([field]) =>
+              [
+                'id',
+                'summary',
+                'description',
+                'start',
+                'end',
+                'recurrence',
+                'transparency',
+                'visibility',
+                'colorId',
+                'eventLabelId',
+                'reminders',
+                'extendedProperties',
+              ].includes(field),
+            ),
+          );
         try {
           await provider.request(
             method,
             path,
-            Object.fromEntries(
-              Object.entries(action.event ?? {}).filter(([field]) =>
-                [
-                  'id',
-                  'summary',
-                  'description',
-                  'start',
-                  'end',
-                  'recurrence',
-                  'transparency',
-                  'visibility',
-                  'colorId',
-                  'reminders',
-                  'extendedProperties',
-                ].includes(field),
-              ),
-            ),
-            action.kind === 'update' ? { 'If-Match': action.etag ?? '' } : undefined,
+            sendBody(effectiveEvent ?? {}),
+            !isCreate ? { 'If-Match': action.etag ?? '' } : undefined,
           );
         } catch (error) {
-          if (!(action.kind === 'create' && statusOf(error) === 409)) throw error;
+          if (isCreate && statusOf(error) === 409) {
+            /* handled by readback verification */
+          } else if (useLabelParam && [400, 403].includes(statusOf(error)) && effectiveEvent) {
+            // Provider rejected eventLabelVersion=1 / eventLabelId; fallback to colorId
+            labelFallbackActive = true;
+            registry.labelCapability = 'unsupported';
+            saveRegistry(registry);
+            delete effectiveEvent.eventLabelId;
+            if (options.snapshot && options.config) {
+              const colorId = fallbackColorForKey(
+                options.snapshot,
+                options.config,
+                action.key,
+                colors,
+              );
+              if (colorId) effectiveEvent.colorId = colorId;
+            }
+            if (effectiveEvent.extendedProperties?.private) {
+              delete effectiveEvent.extendedProperties.private.syntrop_label;
+              effectiveEvent.extendedProperties.private.syntrop_hash =
+                eventFingerprint(effectiveEvent);
+            }
+            const fallbackPath =
+              eventPath(calendar, isCreate ? undefined : action.remoteId!) +
+              '?sendUpdates=none&conferenceDataVersion=1';
+            await provider.request(
+              method,
+              fallbackPath,
+              sendBody(effectiveEvent),
+              !isCreate ? { 'If-Match': action.etag ?? '' } : undefined,
+            );
+          } else {
+            throw error;
+          }
         }
       }
-      const eventId = action.event?.id ?? action.remoteId!;
-      const actual = await provider.request<GoogleEvent>('GET', eventPath(calendar, eventId));
+      const eventId = effectiveEvent?.id ?? action.remoteId!;
+      let actual = await provider.request<GoogleEvent>('GET', eventPath(calendar, eventId));
+      if (effectiveEvent?.eventLabelId && !actual.eventLabelId) {
+        // Provider accepted request but ignored eventLabelId; downgrade to colorId fallback
+        labelFallbackActive = true;
+        registry.labelCapability = 'unsupported';
+        saveRegistry(registry);
+        delete effectiveEvent.eventLabelId;
+        if (options.snapshot && options.config) {
+          const colorId = fallbackColorForKey(options.snapshot, options.config, action.key, colors);
+          if (colorId) effectiveEvent.colorId = colorId;
+        }
+        if (effectiveEvent.extendedProperties?.private) {
+          delete effectiveEvent.extendedProperties.private.syntrop_label;
+          effectiveEvent.extendedProperties.private.syntrop_hash = eventFingerprint(effectiveEvent);
+        }
+        await provider.request(
+          'PUT',
+          eventPath(calendar, eventId) + '?sendUpdates=none&conferenceDataVersion=1',
+          Object.fromEntries(
+            Object.entries(effectiveEvent).filter(([field]) =>
+              [
+                'id',
+                'summary',
+                'description',
+                'start',
+                'end',
+                'recurrence',
+                'transparency',
+                'visibility',
+                'colorId',
+                'reminders',
+                'extendedProperties',
+              ].includes(field),
+            ),
+          ),
+          actual.etag ? { 'If-Match': actual.etag } : undefined,
+        );
+        actual = await provider.request<GoogleEvent>('GET', eventPath(calendar, eventId));
+      }
       if (
         !owned(actual, registry.workspaceId, action.key) ||
         actual.status === 'cancelled' ||
         unexpectedExtras(actual) ||
-        (action.event && eventFingerprint(actual) !== eventFingerprint(action.event))
+        (effectiveEvent && eventFingerprint(actual) !== eventFingerprint(effectiveEvent))
       )
         throw new LifeError('GOOGLE_VERIFY', 'Remote event did not match the approved projection');
       mappings[action.key] = {
@@ -537,5 +818,15 @@ export async function applySync(
       });
     }
   }
-  return { ...summary, failures, manualSync: true };
+  return {
+    ...summary,
+    failures,
+    manualSync: true,
+    ...(Object.keys(wantedLabels).length > 0
+      ? {
+          labelMode:
+            registry.labelCapability === 'supported' ? 'custom-labels' : 'colorId-fallback',
+        }
+      : {}),
+  };
 }

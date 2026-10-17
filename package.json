@@ -1,7 +1,7 @@
 {
   "name": "syntrop",
-  "version": "0.3.0",
-  "description": "Local-first operational memory engine with deterministic scheduling and optional Google Calendar projection.",
+  "version": "0.4.0",
+  "description": "Local-first operational memory engine with deterministic scheduling and optional Google Calendar & Tasks integration.",
   "private": true,
   "license": "MIT",
   "type": "module",

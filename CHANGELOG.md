@@ -5,6 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-10-17
+
+Adaptive Calendar & Google Tasks Integration (Beta).
+
+### Added
+- **Native Google Tasks Integration (`Syntrop · Tasks` & `Syntrop · Habits`)**:
+  - Actionable Syntrop tasks project into a dedicated managed **Syntrop · Tasks** list with configurable policies (`actionable`, `scheduled`, `selected`, `ready`, `none`) and ownership metadata (`Syntrop workspace:` / `Syntrop source:` / `Syntrop hash:`).
+  - Daily and weekly habits (`--mode tasks`) project as individually completable dated Google Tasks in **Syntrop · Habits** over a bounded rolling horizon (default 14 days, max 90 days) without fabricating historical completions for already-logged past days.
+  - Paginated task inspection (`showCompleted=true&showHidden=true&showDeleted=true`) and uncertain `POST` creation recovery to prevent duplicate tasks after network timeouts.
+- **Controlled Completion Reconciliation (`integration google reconcile`)**:
+  - Reconciles verified Google Task completion (`status: 'completed'`) into Syntrop (`task done` semantics: checks DAG prerequisites, active project, optimistic version, cancels only future scheduled work sessions, and preserves past session history without fabricating `session_outcomes`).
+  - Reconciles verified habit task completion into `habit_occurrences` (`habit log` semantics) using the mapped local `occurrenceDate` in the workspace IANA timezone rather than raw UTC completion timestamps.
+  - Surfaces conflicts when a completed task or habit occurrence is unchecked remotely or when a dependency-blocked task is checked off before its prerequisites.
+- **Agent-Designed Calendar Presentation & Custom Event Labels (`integration google presentation`)**:
+  - Versioned `presentation` schema supporting user-defined categories and custom `#RRGGBB` HEX labels (`theme.labels`), concise project `shortName` prefixes, concise task `shortTitle` overrides, and habit `shortName` display titles while preserving full local operational records.
+  - Native Google Calendar custom event label synchronization (`labelProperties.eventLabels` with deterministic RFC 4122 UUIDs and `eventLabelVersion=1` on event writes), preserving existing calendar labels and automatically falling back to nearest standard `colorId` palette entries if unsupported.
+  - New [syntrop-calendar-presentation](skills/syntrop-calendar-presentation/SKILL.md) skill and updated cognitive routing contract in [AGENTS.md](AGENTS.md).
+- **Safe v0.3.0 Migration & Diagnostics (`integration google migrate` & `diagnose`)**:
+  - Preserves existing v0.3.0 Focus calendar session and commitment event IDs (`mappings.json`) without false drift conflicts from Google's built-in `eventLabelId` UUID mirroring on `colorId` events.
+  - Creates and verifies replacement Google Tasks and habit task occurrences before retiring redundant Calendar habit series (`skipHabitRetire` guard).
+  - Opt-in per-workspace standing authorization (`--auto-sync`, `--auto-reconcile`, `--auto`) for agent-driven synchronization and reconciliation during active sessions.
+
+### Changed
+- `integration google connect` now requests both `calendar.app.created` and `tasks` by default using incremental authorization (`include_granted_scopes=true`) while preserving existing refresh tokens (`--calendar-only` remains available).
+- `integration google preview`, `sync`, and `recover` coordinate both managed calendars and managed Google Tasks lists when Tasks projection is active.
+
+### Limitations
+- Public Google Tasks API v1 stores date-only `due` fields (discarding time-of-day), does not expose recurring-rule creation (`RRULE`), and does not support custom per-task HEX colors. Timed execution blocks remain Calendar events in `Syntrop · Focus`.
+- Synchronization and completion reconciliation remain explicit or agent-driven during active sessions; no background daemon or unrestricted bidirectional editing is introduced.
+- Notion Calendar displays connected Google Calendar events (`Syntrop · Focus`), whereas native Google Tasks (`Syntrop · Tasks` and `Syntrop · Habits`) are targeted at Google Calendar web/mobile and Google Tasks interfaces.
+
 ## [0.3.0] - 2026-10-17
 
 Calendar Integration beta. Google OAuth consent, live API smoke, and human-visible calendar QA are **not completed**: no account-owner Desktop OAuth client is available. This is not a production-readiness claim.

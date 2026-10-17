@@ -138,7 +138,7 @@ Syntrop is designed to give AI coding agents persistent, verifiable operational 
 - **Codex**: `AGENTS.md` supplies repository instructions.
 - **Antigravity / other runtimes**: manually ask the agent to read `AGENTS.md`; automatic discovery is unverified.
 
-Confirm your runtime actually read `AGENTS.md`. The six `skills/` files are read on demand through that protocol; they are not universally installed or auto-discovered. See [Agent Integration](agent-integration.md) for official discovery references and live-testing limits.
+Confirm your runtime actually read `AGENTS.md`. The seven `skills/` files are read on demand through that protocol; they are not universally installed or auto-discovered. See [Agent Integration](agent-integration.md) for official discovery references and live-testing limits.
 
 ### The First Agent Prompt
 Open your preferred coding agent inside this repository and paste:
@@ -171,15 +171,13 @@ syntrop restore --from "$HOME/syntrop-backup-20261015" --workspace "$HOME/restor
 For more details on CLI commands, refer to the [CLI Reference](cli-reference.md).
 
 
-## 7. Optional visual calendar
+## 7. Optional Google Calendar & Tasks integration
 
-After you have local work sessions, you can publish an approved projection to Google Calendar without changing your offline workflow. Start with:
+After you have local work sessions, tasks, and habits, you can publish an approved projection to Google Calendar (**Syntrop · Focus**) and native Google Tasks (**Syntrop · Tasks** and **Syntrop · Habits**) without changing your offline workflow. Start with:
 
 ```sh
 syntrop integration google setup
 syntrop integration google status
 ```
 
-`setup` without a client prints the onboarding steps and makes no network request. Follow the [Google Calendar setup guide](integrations/google-calendar.md) to create your Google Cloud Desktop OAuth client, consent in the system browser, choose privacy and habit display, preview, and approve the first sync. A task deadline is an optional all-day marker, not a work session. Flexible habit reminders are selected explicitly and remain separate from `habit log` completion.
-
-Google Calendar web/mobile and Notion Calendar can show the same dedicated Google calendars. There is no separate Notion API, background sync, or bidirectional editing. OAuth secrets and integration settings are kept outside workspace backups. Live account onboarding and calendar UI have not yet been verified; a normal account-owner consent flow is required before that evidence can be obtained.
+`setup` without a client prints the onboarding steps and makes no network request. Follow the [Google Calendar & Tasks setup guide](integrations/google-calendar.md) to configure your Google Cloud Desktop OAuth client, consent in the system browser (`calendar.app.created` + `tasks`), configure presentation (`shortName`, `shortTitle`, custom `#RRGGBB` event labels) and habit task occurrences (`--mode tasks`), preview, and approve your sync. Checked-off tasks and habit occurrences in Google Tasks can be reconciled back into Syntrop via `syntrop integration google reconcile`. OAuth secrets and integration settings are kept outside workspace backups.
