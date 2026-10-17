@@ -30,6 +30,7 @@ Adaptive Calendar & Google Tasks Integration (Beta).
 ### Changed
 - `integration google connect` now requests both `calendar.app.created` and `tasks` by default using incremental authorization (`include_granted_scopes=true`) while preserving existing refresh tokens (`--calendar-only` remains available).
 - `integration google preview`, `sync`, and `recover` coordinate both managed calendars and managed Google Tasks lists when Tasks projection is active.
+- Live verification completed on 2026-10-17 against Google Calendar API v3 and Google Tasks API v1: 15-scenario isolated synthetic smoke test (custom `#RRGGBB` event labels, task/habit projection, completion reconciliation with DAG prerequisite enforcement and local timezone habit date mapping, ownership boundaries, and cleanup) plus live v0.3.0-to-v0.4.0 personal workspace migration (21 Focus events upgraded in place, 2 managed task lists created, 4 actionable tasks + 42 rolling 14-day habit tasks projected with verified idempotency).
 
 ### Limitations
 - Public Google Tasks API v1 stores date-only `due` fields (discarding time-of-day), does not expose recurring-rule creation (`RRULE`), and does not support custom per-task HEX colors. Timed execution blocks remain Calendar events in `Syntrop · Focus`.
